@@ -1,3 +1,3 @@
-#Transport
+# Transport
 
-# Transport is a data transmission module using an uncomplicated message protocol
+Transport is a data transmission module using an uncomplicated message protocol
