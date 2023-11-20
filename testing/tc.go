@@ -21,7 +21,7 @@ func tcA() error {
   }
 
   logger.Infof("got new ApiRecord : %v", rcd.AsMap())
-  if rcd.AppFailed() {
+  if rcd.Unwrap() != nil {
     logger.Errorf("new ApiRecord should not have an error since the Errstr argument was blank, but it does: |%v|", rcd.Error())
   } else {
     logger.Infof("new ApiRecord did not create an error as required")
@@ -62,7 +62,7 @@ func tcB() error {
   }
 
   logger.Infof("got new ApiRecord : %v", rcd.AsMap())
-  if rcd.AppFailed() {
+  if rcd.Unwrap() != nil {
     logger.Errorf("new ApiRecord should not have an error since the Errstr argument was blank, but it does: |%v|", rcd.Error())
     return rcd.Unwrap()
   } else {
@@ -84,6 +84,21 @@ func tcB() error {
   err = rcd.SetData(data)
   if err == nil {
     return fmt.Errorf("ApiRecord did not create a data proto error as required")
+  }
+
+  err = rcd.SetData(data["RemoteAddr"])
+
+  w := rcd.Parameter()
+
+  logger.Infof("RemoteAddr : %v", w.AsInterface())
+
+  z := w.StringList()
+
+  if len(z) != 2 {
+    return fmt.Errorf("RemoteAddr parameter retrieval failed")
+  }
+  for _, v := range z {
+    logger.Debugf("remote addr : %s", v)
   }
 
   return nil
