@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08
-	github.com/pcbuildpluscoding/strucex v0.0.0-20231120061346-54efb880f4ef
+	github.com/pcbuildpluscoding/strucex v0.0.0-20231120085628-84e2e4e1b6af
 	github.com/pcbuildpluscoding/types v0.0.0-20231119230943-0643911e3989
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/protobuf v1.28.1
