@@ -8,98 +8,101 @@ import (
 
 func tcA() error {
 
-  logger.Infof("testcase A - checks NewApiRecord performance")
+	logger.Infof("testcase A - checks NewApiRecord performance")
 
-  rcd, err := tpt.NewApiRecord(map[string]interface{}{
-    "Code": 200,
-    "Error": "",
-    "Data": "ApiRecord creation test",
-  })
+	rcd, err := tpt.NewApiRecord(map[string]interface{}{
+		"Code":  200,
+		"Error": "",
+		"Data":  "ApiRecord creation test",
+	})
 
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 
-  logger.Infof("got new ApiRecord : %v", rcd.AsMap())
-  if rcd.Unwrap() != nil {
-    logger.Errorf("new ApiRecord should not have an error since the Errstr argument was blank, but it does: |%v|", rcd.Error())
-  } else {
-    logger.Infof("new ApiRecord did not create an error as required")
-  }
+	logger.Infof("got new ApiRecord : %v", rcd.AsMap())
+	if rcd.Unwrap() != nil {
+		logger.Errorf("new ApiRecord should not have an error since the Errstr argument was blank, but it does: |%v|", rcd.Error())
+	} else {
+		logger.Infof("new ApiRecord did not create an error as required")
+	}
 
-  if rcd.Parameter().String() == "ApiRecord creation test" {
-    logger.Infof("ApiRecord.Parameter.String correctly returned the expected value")
-  }
-  return nil
+	if rcd.Parameter().String() == "ApiRecord creation test" {
+		logger.Infof("ApiRecord.Parameter.String correctly returned the expected value")
+	}
+	return nil
 }
 
 func tcB() error {
 
-  logger.Infof("testcase A - checks NewApiRecord performance")
+	logger.Infof("testcase A - checks NewApiRecord performance")
 
-  x := map[string]interface{}{
-    "Code": 200,
-    "Error": "",
-  }
+	x := map[string]interface{}{
+		"Code":  200,
+		"Error": "",
+	}
 
-  data := map[string]interface{}{
-    "Action": "Resume",
-    "JobId": "ed07bed0-c30d-49f5-9fde-9cbff6763a64",
-    "RemoteAddr": []interface{}{"127.0.0.1:9999","10.0.14.2:8888"},
-    "ResumeRef": map[string]interface{}{
-        "TaskId": "Task1B",
-    },
-  }
+	data := map[string]interface{}{
+		"Action":     "Resume",
+		"JobId":      "ed07bed0-c30d-49f5-9fde-9cbff6763a64",
+		"RemoteAddr": []interface{}{"127.0.0.1:9999", "10.0.14.2:8888"},
+		"ResumeRef": map[string]interface{}{
+			"TaskId": "Task1B",
+		},
+	}
 
-  rcd, err := tpt.NewApiRecord(x)
-  if err != nil {
-    return err
-  }
+	rcd, err := tpt.NewApiRecord(x)
+	if err != nil {
+		return err
+	}
 
-  err = rcd.SetData(data)
-  if err != nil {
-    return err
-  }
+	err = rcd.SetData(data)
+	if err != nil {
+		return err
+	}
 
-  logger.Infof("got new ApiRecord : %v", rcd.AsMap())
-  if rcd.Unwrap() != nil {
-    logger.Errorf("new ApiRecord should not have an error since the Errstr argument was blank, but it does: |%v|", rcd.Error())
-    return rcd.Unwrap()
-  } else {
-    logger.Infof("new ApiRecord did not create an error as required")
-  }
+	logger.Infof("got new ApiRecord : %v", rcd.AsMap())
+	if rcd.Unwrap() != nil {
+		logger.Errorf("new ApiRecord should not have an error since the Errstr argument was blank, but it does: |%v|", rcd.Error())
+		return rcd.Unwrap()
+	} else {
+		logger.Infof("new ApiRecord did not create an error as required")
+	}
 
-  y := rcd.SubNode()
-  if err := y.Unwrap(); err != nil {
-    return err
-  }
+	y := rcd.SubNode()
+	if err := y.Unwrap(); err != nil {
+		return err
+	}
 
-  if v := y.String("ResumeRef/TaskId"); v == "Task1B" {
-    logger.Infof("ApiRecord.SubNode.String correctly returned the expected value : %s", v)
-  } else {
-    return fmt.Errorf("expected result : Task1B not received : |%s|", v)
-  }
+	if v := y.String("ResumeRef/TaskId"); v == "Task1B" {
+		logger.Infof("ApiRecord.SubNode.String correctly returned the expected value : %s", v)
+	} else {
+		return fmt.Errorf("expected result : Task1B not received : |%s|", v)
+	}
 
-  data["ResumeRef"] = map[string]string{"TaskId": "Task1B"}
-  err = rcd.SetData(data)
-  if err == nil {
-    return fmt.Errorf("ApiRecord did not create a data proto error as required")
-  }
+	data["ResumeRef"] = map[string]string{"TaskId": "Task1B"}
+	err = rcd.SetData(data)
+	if err == nil {
+		return fmt.Errorf("ApiRecord did not create a data proto error as required")
+	}
 
-  err = rcd.SetData(data["RemoteAddr"])
+	err = rcd.SetData(data["RemoteAddr"])
+	if err != nil {
+		return err
+	}
 
-  w := rcd.Parameter()
+	w := rcd.Parameter()
 
-  logger.Infof("RemoteAddr : %v", w.AsInterface())
+	logger.Infof("RemoteAddr : %v", w.AsInterface())
 
-  z := w.StringList()
+	z := w.StringList()
 
-  if len(z) != 2 {
-    return fmt.Errorf("RemoteAddr parameter retrieval failed")
-  }
-  for _, v := range z {
-    logger.Debugf("remote addr : %s", v)
-  }
+	if len(z) != 2 {
+		return fmt.Errorf("RemoteAddr parameter retrieval failed")
+	}
+	for _, v := range z {
+		logger.Debugf("remote addr : %s", v)
+	}
 
-  return nil
+	return nil
 }
