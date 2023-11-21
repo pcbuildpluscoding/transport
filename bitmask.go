@@ -14,7 +14,7 @@ type Flag byte
 
 func (f Flag) HasMore() bool    { return f&SNDMORE == SNDMORE }
 func (f Flag) IsLarge() bool    { return f&LARGE == LARGE }
-func (f Flag) isSyncTask() bool { return f&SYNC_MSG == SYNC_MSG }
+func (f Flag) IsSyncTask() bool { return f&SYNC_MSG == SYNC_MSG }
 
 const (
 	LARGE    = 0x1

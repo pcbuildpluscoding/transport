@@ -4,12 +4,12 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/google/go-cmp v0.5.5 h1:Khx7svrCpmxxtHBq5j2mp/xVjsi8hQMfNLvJFAlrGgU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
-github.com/pcbuildpluscoding/errorlist v0.0.0-20230621050331-39ff54f9a3bb h1:/mm3h9JX440Loi0Ghq2XxMCAk0hIMHLMemwZEQizBDA=
-github.com/pcbuildpluscoding/errorlist v0.0.0-20230621050331-39ff54f9a3bb/go.mod h1:VLcY+sh3VebYpRhTIR0lpNWevD7wggYQjSxNgwRdrg8=
+github.com/pcbuildpluscoding/errorlist v0.0.0-20231121094649-61c3cd3a5182 h1:neTJ9bpsprbR0uG7S1aML4+vXAwGJof+lTfEFGlUnPs=
+github.com/pcbuildpluscoding/errorlist v0.0.0-20231121094649-61c3cd3a5182/go.mod h1:VLcY+sh3VebYpRhTIR0lpNWevD7wggYQjSxNgwRdrg8=
 github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08 h1:jIzp43b1TCMjYHik3BP784PqBVLylXJD9HVLI0pljtQ=
 github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08/go.mod h1:s1FbVnIcThWkMotvBxyEoIk40nb91fbJu549tViHARs=
-github.com/pcbuildpluscoding/strucex v0.0.0-20231120085628-84e2e4e1b6af h1:RvmcV+OZeD83nIETQwNdP2t+98RGsom4BnRIo9xIcPc=
-github.com/pcbuildpluscoding/strucex v0.0.0-20231120085628-84e2e4e1b6af/go.mod h1:eMFesE78MLnZfDFQNZlnHqhHUIhHbZNK3itgxbQuAJ4=
+github.com/pcbuildpluscoding/strucex v0.0.0-20231121101209-16663f086ca1 h1:abt5yrPDv4cRVJ48L+y93IOb4rhZoN/XQM/sDsjvNCY=
+github.com/pcbuildpluscoding/strucex v0.0.0-20231121101209-16663f086ca1/go.mod h1:4/36pJjBKj+R66pyCff1R+4qHRjpbY3L3GfrYRn5/1I=
 github.com/pcbuildpluscoding/types v0.0.0-20231119230943-0643911e3989 h1:GxCTwIqX5bD83M1E2sUOx6hDdQZha8Pw6avQhL/Lx1c=
 github.com/pcbuildpluscoding/types v0.0.0-20231119230943-0643911e3989/go.mod h1:rC5KZ2OY6th0ZYgTUs7OxWFzeZfre8RJVNgeHlM9zec=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
