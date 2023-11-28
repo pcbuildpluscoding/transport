@@ -62,14 +62,15 @@ func (n *ApiNote) asVMap() map[string]*spb.Value {
 		panic(fmt.Errorf("ApiNote timestamp field is not a valid structpb.Value type : %v", err))
 	}
 
-	switch n.data.(type) {
+	switch d := n.data.(type) {
 	case *Strucex:
-		rw := n.data.(*Strucex)
-		x["Data"], err = spb.NewValue(rw.AsMap())
+		x["Data"] = spb.NewStructValue(d.AsStruct())
+	case *spb.Struct:
+		x["Data"] = spb.NewStructValue(d)
 	case *spb.Value:
-		x["Data"] = n.data.(*spb.Value)
+		x["Data"] = d
 	default:
-		x["Data"], err = spb.NewValue(n.data)
+		x["Data"], err = spb.NewValue(d)
 	}
 
 	if err != nil {
@@ -145,7 +146,7 @@ func (n *ApiNote) fromMap(vm map[string]*spb.Value) {
 				}
 				n.err = ApiError{
 					code: int(y.Fields["Code"].GetNumberValue()),
-					key:  y.Fields["AppKey"].GetStringValue(),
+					key:  y.Fields["Key"].GetStringValue(),
 					err:  err,
 				}
 			}
@@ -160,21 +161,44 @@ func (n *ApiNote) fromMap(vm map[string]*spb.Value) {
 // Error
 // ------------------------------------------------------------------//
 func (n ApiNote) Error() string {
-	return fmt.Sprintf("code: %d, error: %v", n.code, n.err)
+	if n.err != nil {
+		return n.err.Error()
+	}
+	return ""
 }
 
 // -------------------------------------------------------------- //
 // Empty
 // ---------------------------------------------------------------//
 func (n ApiNote) Empty() bool {
-	return n.data == nil
+	return n.code == 0
 }
 
 // ----------------------------------------------------------------//
 // Hardcopy
 // ----------------------------------------------------------------//
 func (n *ApiNote) Hardcopy() ApiNote {
-	return *n
+	c := ApiNote{
+		code: n.code,
+		err:  n.err,
+	}
+	switch x := n.data.(type) {
+	case *spb.Value:
+		c.data = x.AsInterface()
+	case map[string]interface{}:
+		y := map[string]interface{}{}
+		for k, v := range x {
+			y[k] = v
+		}
+		c.data = y
+	case []interface{}:
+		y := make([]interface{}, len(x))
+		copy(y, x)
+		c.data = y
+	default:
+		c.data = x
+	}
+	return c
 }
 
 // ------------------------------------------------------------------//
@@ -256,6 +280,21 @@ func (n *ApiNote) With(code int, data interface{}) *ApiNote {
 }
 
 // ----------------------------------------------------------------//
+// WithErr
+// ----------------------------------------------------------------//
+func (n *ApiNote) WithErr(err error, code ...int) *ApiNote {
+	n.code = 200
+	if err != nil {
+		n.err = err
+		n.code = 400
+		if code != nil && code[0] > 400 {
+			n.code = code[0]
+		}
+	}
+	return n
+}
+
+// ----------------------------------------------------------------//
 // Withf
 // ----------------------------------------------------------------//
 func (n *ApiNote) Withf(code int, format string, args ...interface{}) *ApiNote {
@@ -287,11 +326,33 @@ func (n *ApiNote) Wrapf(code int, format string, args ...interface{}) *ApiNote {
 type ApiResult struct{}
 
 // ----------------------------------------------------------------//
+// CheckErr
+// ----------------------------------------------------------------//
+func (ApiResult) CheckErr(err error, code ...int) *ApiNote {
+	x := &ApiNote{code: 200}
+	if err != nil {
+		x.err = err
+		if code != nil {
+			x.code = code[0]
+		}
+	}
+	return x
+}
+
+// ----------------------------------------------------------------//
 // WithCode
 // ----------------------------------------------------------------//
 func (ApiResult) With(code int, data interface{}) *ApiNote {
 	x := ApiNote{}
 	return x.With(code, data)
+}
+
+// ----------------------------------------------------------------//
+// WithErr
+// ----------------------------------------------------------------//
+func (ApiResult) WithErr(err error, code ...int) *ApiNote {
+	x := ApiNote{}
+	return x.WithErr(err, code...)
 }
 
 // ----------------------------------------------------------------//

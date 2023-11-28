@@ -49,7 +49,7 @@ func GetReply(r io.Reader) *ApiNote {
 	if err != nil {
 		return status.With(400, err)
 	}
-	logger.Debugf("GetReply response : %v", status)
+	// logger.Debugf("GetReply response : %v", status)
 	return status
 }
 

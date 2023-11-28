@@ -8,10 +8,10 @@ github.com/pcbuildpluscoding/errorlist v0.0.0-20231121094649-61c3cd3a5182 h1:neT
 github.com/pcbuildpluscoding/errorlist v0.0.0-20231121094649-61c3cd3a5182/go.mod h1:VLcY+sh3VebYpRhTIR0lpNWevD7wggYQjSxNgwRdrg8=
 github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08 h1:jIzp43b1TCMjYHik3BP784PqBVLylXJD9HVLI0pljtQ=
 github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08/go.mod h1:s1FbVnIcThWkMotvBxyEoIk40nb91fbJu549tViHARs=
-github.com/pcbuildpluscoding/strucex v0.0.0-20231121101209-16663f086ca1 h1:abt5yrPDv4cRVJ48L+y93IOb4rhZoN/XQM/sDsjvNCY=
-github.com/pcbuildpluscoding/strucex v0.0.0-20231121101209-16663f086ca1/go.mod h1:4/36pJjBKj+R66pyCff1R+4qHRjpbY3L3GfrYRn5/1I=
-github.com/pcbuildpluscoding/types v0.0.0-20231119230943-0643911e3989 h1:GxCTwIqX5bD83M1E2sUOx6hDdQZha8Pw6avQhL/Lx1c=
-github.com/pcbuildpluscoding/types v0.0.0-20231119230943-0643911e3989/go.mod h1:rC5KZ2OY6th0ZYgTUs7OxWFzeZfre8RJVNgeHlM9zec=
+github.com/pcbuildpluscoding/strucex v0.0.0-20231127055630-f2538e31201a h1:arX8VoxUwQ5xOZD2gJQ1UzZBP4EiwcCxsOVI9hMWth0=
+github.com/pcbuildpluscoding/strucex v0.0.0-20231127055630-f2538e31201a/go.mod h1:4/36pJjBKj+R66pyCff1R+4qHRjpbY3L3GfrYRn5/1I=
+github.com/pcbuildpluscoding/types v0.0.0-20231121100016-babe6fa1e53b h1:TDKlICwov9jpwFz8FgDBjxB4GNpkPQRo6mqSX0cRPKE=
+github.com/pcbuildpluscoding/types v0.0.0-20231121100016-babe6fa1e53b/go.mod h1:rC5KZ2OY6th0ZYgTUs7OxWFzeZfre8RJVNgeHlM9zec=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
