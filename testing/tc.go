@@ -69,7 +69,7 @@ func tcB() error {
 		logger.Infof("new ApiRecord did not create an error as required")
 	}
 
-	y := rcd.SubNode()
+	y := rcd.Runware()
 	if err := y.Unwrap(); err != nil {
 		return err
 	}

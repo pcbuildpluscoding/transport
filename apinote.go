@@ -205,7 +205,8 @@ func (n *ApiNote) Hardcopy() ApiNote {
 // Is
 // ------------------------------------------------------------------//
 func (n ApiNote) Is(target error) bool {
-	return errors.Is(n.err, target)
+	_, matched := target.(*ApiNote)
+	return matched
 }
 
 // -------------------------------------------------------------- //
@@ -214,6 +215,14 @@ func (n ApiNote) Is(target error) bool {
 func (n ApiNote) Parameter() *Parametric {
 	v, _ := stx.NewParameter("-", n.data)
 	return v
+}
+
+// -------------------------------------------------------------- //
+// Runware
+// ---------------------------------------------------------------//
+func (n ApiNote) Runware() *Strucex {
+	rw, _ := stx.NewRunware(n.data)
+	return rw
 }
 
 // ----------------------------------------------------------------//
@@ -230,14 +239,6 @@ func (n *ApiNote) SetData(data interface{}) error {
 // ----------------------------------------------------------------//
 func (n *ApiNote) SetTimestamp() {
 	n.timestamp = time.Now()
-}
-
-// -------------------------------------------------------------- //
-// SubNode
-// ---------------------------------------------------------------//
-func (n ApiNote) SubNode() *Strucex {
-	rw, _ := stx.NewRunware(n.data)
-	return rw
 }
 
 // ----------------------------------------------------------------//

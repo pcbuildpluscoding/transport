@@ -278,11 +278,19 @@ func (e ApiError) Error() string {
 // Is
 // ------------------------------------------------------------------//
 func (e ApiError) Is(target error) bool {
-	x, ok := target.(*ApiError)
-	if !ok {
-		return false
+	_, matched := target.(*ApiError)
+	return matched
+}
+
+// ------------------------------------------------------------------//
+// ToApiNote
+// ------------------------------------------------------------------//
+func (n ApiError) ToApiNote() *ApiNote {
+	return &ApiNote{
+		code: n.code,
+		data: n.key,
+		err:  n.err,
 	}
-	return e.code == x.code && e.key == x.key && errors.Is(e.err, x.err)
 }
 
 // ------------------------------------------------------------------//
