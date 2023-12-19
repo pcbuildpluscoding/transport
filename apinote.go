@@ -153,7 +153,7 @@ func (n *ApiNote) fromMap(vm map[string]*spb.Value) {
 		}
 	}
 	if x, ok := vm["Data"]; ok {
-		n.data = x.AsInterface()
+		n.data = x
 	}
 }
 
@@ -213,8 +213,7 @@ func (n ApiNote) Is(target error) bool {
 // Parameter
 // ---------------------------------------------------------------//
 func (n ApiNote) Parameter() *Parametric {
-	v, _ := stx.NewParameter("-", n.data)
-	return v
+	return stx.NewParameter("-", n.data)
 }
 
 // -------------------------------------------------------------- //
