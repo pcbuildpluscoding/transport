@@ -74,7 +74,7 @@ func tcB() error {
 		return err
 	}
 
-	if v := y.Parameter("ResumeRef/TaskId").String(); v == "Task1B" {
+	if v := y.String("ResumeRef/TaskId"); v == "Task1B" {
 		logger.Infof("ApiRecord.SubNode.String correctly returned the expected value : %s", v)
 	} else {
 		return fmt.Errorf("expected result : Task1B not received : |%s|", v)

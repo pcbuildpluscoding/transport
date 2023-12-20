@@ -8,10 +8,10 @@ github.com/pcbuildpluscoding/errorlist v0.0.0-20231121094649-61c3cd3a5182 h1:neT
 github.com/pcbuildpluscoding/errorlist v0.0.0-20231121094649-61c3cd3a5182/go.mod h1:VLcY+sh3VebYpRhTIR0lpNWevD7wggYQjSxNgwRdrg8=
 github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08 h1:jIzp43b1TCMjYHik3BP784PqBVLylXJD9HVLI0pljtQ=
 github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08/go.mod h1:s1FbVnIcThWkMotvBxyEoIk40nb91fbJu549tViHARs=
-github.com/pcbuildpluscoding/strucex v0.0.0-20231219214536-ccc205b3858a h1:hSj3XLUvWAhbe1Kdl2HAgaijRdnfrqEYpjjELyQ7d5Y=
-github.com/pcbuildpluscoding/strucex v0.0.0-20231219214536-ccc205b3858a/go.mod h1:JnPFaezNYElpda06DTmpdNCUQ2+vZma1Q+U+XFCP/DY=
-github.com/pcbuildpluscoding/types v0.0.0-20231202054628-7fe6a4e0a90d h1:iUyYZL2nd8Z5ghCr4nzyRHZhCdSQzuNm7MMTvfarlaQ=
-github.com/pcbuildpluscoding/types v0.0.0-20231202054628-7fe6a4e0a90d/go.mod h1:rC5KZ2OY6th0ZYgTUs7OxWFzeZfre8RJVNgeHlM9zec=
+github.com/pcbuildpluscoding/strucex v0.0.0-20231220203518-e667e9ee9ee8 h1:+fawe0DG+VfQDVMj/LNb5OslmuiDdSbFwRgdoW7iaPE=
+github.com/pcbuildpluscoding/strucex v0.0.0-20231220203518-e667e9ee9ee8/go.mod h1:zsYmhByn3QQ5vbb02tU0UkTX5kRfaXWtMJ3T9jc1oJM=
+github.com/pcbuildpluscoding/types v0.0.0-20231220195755-a27cb84bf122 h1:mxRdoOfy5XWCmj8BgvGQuJJCJ14LwVvdcVLGtZNIwm4=
+github.com/pcbuildpluscoding/types v0.0.0-20231220195755-a27cb84bf122/go.mod h1:rC5KZ2OY6th0ZYgTUs7OxWFzeZfre8RJVNgeHlM9zec=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
@@ -27,5 +27,5 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.28.1 h1:d0NfwRgPtno5B1Wa6L2DAG+KivqkdutMf1UhdNx175w=
 google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
