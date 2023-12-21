@@ -59,7 +59,7 @@ func (n *ApiNote) asVMap() map[string]*spb.Value {
 	}
 
 	if err != nil {
-		panic(fmt.Errorf("ApiNote timestamp field is not a valid structpb.Value type : %v", err))
+		panic(fmt.Errorf("ApiNote timestamp value is not a valid structpb type : %v", err))
 	}
 
 	switch d := n.data.(type) {
@@ -74,7 +74,7 @@ func (n *ApiNote) asVMap() map[string]*spb.Value {
 	}
 
 	if err != nil {
-		panic(fmt.Errorf("ApiNote data field is not a valid structpb.Value type : %v", err))
+		panic(fmt.Errorf("ApiNote data value is not a valid structpb type : %v", err))
 	}
 
 	return x
