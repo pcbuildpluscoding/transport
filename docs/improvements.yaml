@@ -1,0 +1,11 @@
+---
+transport:
+  - fileName: apinote.go
+    date: 26 Dec 2023
+    notes: |
+      update Value() interface{} to check the data type. If *spb.Value then returns data.AsInterface()
+  - fileName: apinode.go
+    date: 26 Dec 2023
+    notes: |
+      NewApiRecord needs to check if Import(...) fails and if yes, should assign the error to ApiNote.err before
+      returning the value

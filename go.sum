@@ -10,8 +10,8 @@ github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08 h1:jIzp4
 github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08/go.mod h1:s1FbVnIcThWkMotvBxyEoIk40nb91fbJu549tViHARs=
 github.com/pcbuildpluscoding/strucex v0.0.0-20231221102443-8d2629f9114e h1:N7Hfo/J203TH9XmBHueYicWukfZpmCGNCQ3zGLYZxK0=
 github.com/pcbuildpluscoding/strucex v0.0.0-20231221102443-8d2629f9114e/go.mod h1:jqrp2rgSmRw0DQyDNo+Q2cjbNjfg9eyb4JwcH4aHTB8=
-github.com/pcbuildpluscoding/types v0.0.0-20231221101904-480dacfb0139 h1:VfQoKhEM30Yjg0EjaZH7hIBrjgx9XW3MKcNaNc7pJXM=
-github.com/pcbuildpluscoding/types v0.0.0-20231221101904-480dacfb0139/go.mod h1:E03hGswLpVIf+FiCr8QcZcDh683Ed13ashUB8EGrH/I=
+github.com/pcbuildpluscoding/types v0.0.0-20231230061459-ef341fe86a2a h1:pY5ZOd2VPf/KRHd6sT/hOux/9uGJvOtnw5+l3hJa8nM=
+github.com/pcbuildpluscoding/types v0.0.0-20231230061459-ef341fe86a2a/go.mod h1:E03hGswLpVIf+FiCr8QcZcDh683Ed13ashUB8EGrH/I=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=

@@ -171,7 +171,7 @@ func (n ApiNote) Error() string {
 // Empty
 // ---------------------------------------------------------------//
 func (n ApiNote) Empty() bool {
-	return n.code == 0
+	return n.code == 0 && n.data == nil
 }
 
 // ----------------------------------------------------------------//
@@ -228,8 +228,8 @@ func (n ApiNote) Runware() *Strucex {
 // SetData
 // ----------------------------------------------------------------//
 func (n *ApiNote) SetData(data interface{}) error {
-	_, err := spb.NewValue(data)
-	n.data = data
+	var err error
+	n.data, err = stx.NewSpbValue(data)
 	return err
 }
 
