@@ -1,0 +1,16 @@
+---
+transport:
+  - fileName: apinote.go
+    date: 26 Dec 2023
+    notes: |
+      update Value() interface{} to check the data type. If *spb.Value then returns data.AsInterface()
+    done date: 2 Jan 2024
+  - fileName: apinote.go
+    date: 26 Dec 2023
+    notes: |
+      NewApiRecord needs to check if Import(...) fails and if yes, should assign the error to ApiNote.err before
+      returning the value
+    task:
+      date: 2 Jan 2024
+      review: if the method is not suited to a chainable pattern or for multiple error holding, then an error is 
+              returned and not embedded. It's more suitable to return an error for this contructor method.

@@ -1,0 +1,13 @@
+---
+default:
+  Code: 200
+  Data: ok
+AsMap:
+  Code: 400
+  ApiError:
+    Code: 402 
+    Error: test error
+    Key: test-key
+  Data: [some, test, data]
+ErrorAs:
+  Error: test error
