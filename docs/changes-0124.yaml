@@ -1,5 +1,16 @@
 ---
 apinote.go:
+  - source: Bytes
+    date: 4 Jan 2024
+    notes: |
+      type switch should check string type since if the data type was byte when encoded before transmission
+      the type that is decoded will be string instead of byte because structpb converts []byte to string for
+      protobuf compatibility
+  - source: ErrorAs
+    kind: improvement
+    date: 4 Jan 2024
+    notes: |
+      rename from ErrorAs to As
   - source: Hardcopy
     date: 2 Jan 2024
     notes : |
@@ -21,6 +32,11 @@ apinote.go:
       consider removing the WithErr method because the With method is equivalent and should not 'compete' with 
       another method. My senior engineer says this is valid, but because it is a breaking change we have to wait
       until the right time.
+  - source: Is
+    date: 4 Jan 2024
+    notes: |
+      ApiNote.Is should compare the argument err to the embedded err, not to itself eventhough it qualifies as
+      as error, having an Error() string method
 ioutils.go:
   date: 2 Jan 2024
   notes : |

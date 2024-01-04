@@ -181,6 +181,11 @@ func hasErrIface(v reflect.Value) (error, bool) {
 		return nil, false
 	}
 	// Interface panics if the Value was obtained by accessing unexported struct fields
+	switch v.Kind() {
+	case reflect.Ptr:
+		err, ok := v.Interface().(*error)
+		return *err, ok
+	}
 	err, ok := v.Interface().(error)
 	return err, ok
 }
@@ -307,20 +312,7 @@ func ErrorAs(err error, i interface{}) bool {
 	v := reflect.ValueOf(i)
 	switch v.Kind() {
 	case reflect.Ptr:
-		// terr, isErr := hasErrIface(v)
-		_, isErr := hasErrIface(v)
-		if isErr {
-			if reflect.TypeOf(err).Name() == v.Elem().Type().Name() {
-				// logger.Infof("################### err.TypeOf.Name comparison matches ####################")
-				if v.CanSet() {
-					v.Set(reflect.ValueOf(err))
-					return true
-				}
-				return false
-			}
-			// logger.Infof("################### errors.As matches ####################")
-			return errors.As(err, i)
-		}
+		return errors.As(err, i)
 	}
 	return false
 }

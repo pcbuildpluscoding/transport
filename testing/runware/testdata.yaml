@@ -4,10 +4,13 @@ default:
   Data: ok
 AsMap:
   Code: 400
-  ApiError:
-    Code: 402 
-    Error: test error
-    Key: test-key
-  Data: [some, test, data]
+  Error: container restart failed
+  Data:
+    Code: 402
+    Key: application-xyz
+    Metric: [apple, orange, banana]
+Bytes:
+  Code: 400
+  Data: container restart failed
 ErrorAs:
   Error: test error

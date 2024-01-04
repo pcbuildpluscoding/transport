@@ -4,6 +4,7 @@
 package transport
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
@@ -84,11 +85,13 @@ func (n *ApiNote) asVMap() map[string]*spb.Value {
 // Body
 // ----------------------------------------------------------------//
 func (n *ApiNote) Bytes() ([]byte, error) {
-	switch n.data.(type) {
+	switch x := n.data.(type) {
+	case *spb.Value:
+		return base64.StdEncoding.DecodeString(x.GetStringValue())
 	case []byte:
-		return n.data.([]byte), nil
+		return x, nil
 	default:
-		return nil, fmt.Errorf("Record data type is not []byte")
+		return nil, fmt.Errorf("Record data type |%T| is not []byte", n.data)
 	}
 }
 
