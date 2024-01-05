@@ -1,0 +1,35 @@
+---
+  - date: 4 Jan 2024
+    source: ApiNote.ErrorAs
+    notes: |
+      transportA_test/ErrorAs does not fail because the 2nd of 2 resolver paths is correct. It simply calls
+      errors.As to do a pointer value assignment. The first path is dead code because hasErrIface requires an
+      interface value, but the concrete error value is passed to it. Therefore the As method body after reflect.Ptr
+      confirmation should be reduced to just errors.As
+    source version: 42fa8a1
+    new version: 3dc5663
+    task done: 4 Jan 2024
+  - date: 5 Jan 2024
+    source: ApiNote.Set
+    notes: |
+      ApiNote.Set(i interface{}) should apply literal nil to ApiNote.Data if i == nil
+    source version: 3dc5663
+    new version: current working content
+  - date: 5 Jan 2024
+    source: ApiNote.Empty
+    notes: |
+      ApiNote.Empty() is still true even if ApiNote.err != nil
+    source version: 42fa8a1
+    new version: current working content
+  - date: 5 Jan 2024
+    source: ApiNote.Hardcopy
+    notes: |
+      ApiNote.Hardcopy() does a type check on ApiNote.Data at line 188. For type *spb.Value the data value assigned
+      to copy.Data is interface{} not *spb.Value because it assigns source.Data.AsInterface{}
+    source version: 42fa8a1
+    new version: current working content
+  - date: 5 Jan 2024
+    source: ApiNote.Is
+    notes: |
+      it tests if the argument type == *ApiNote which is not correct. Instead it should test if the error strings
+      of each argument are equal. Return true if yes, otherwise call errors.Is(n.err, target)

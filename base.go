@@ -133,6 +133,9 @@ func TypeName(obj interface{}) string {
 // ---------------------------------------------------------------//
 func NewApiRecord(ival interface{}) (*ApiNote, error) {
 	x := ApiNote{}
+	if ival == nil {
+		return &x, nil
+	}
 	err := stx.Importe(ival, func(y map[string]*spb.Value) error {
 		x.fromMap(y)
 		return nil

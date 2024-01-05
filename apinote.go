@@ -64,6 +64,8 @@ func (n *ApiNote) asVMap() map[string]*spb.Value {
 	}
 
 	switch d := n.data.(type) {
+	case *spb.ListValue:
+		x["Data"] = spb.NewListValue(d)
 	case *Strucex:
 		x["Data"] = spb.NewStructValue(d.AsStruct())
 	case *spb.Struct:
@@ -100,6 +102,37 @@ func (n *ApiNote) Bytes() ([]byte, error) {
 // ----------------------------------------------------------------//
 func (n *ApiNote) Code() int {
 	return n.code
+}
+
+// ----------------------------------------------------------------//
+// copyData
+// ----------------------------------------------------------------//
+func copyData(ival interface{}) (interface{}, error) {
+	switch d := ival.(type) {
+	case *stx.Strucex:
+		frame, err := d.AsStruct().MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		return stx.NewRunware(frame)
+	case *spb.Struct:
+		frame, err := d.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		data := spb.Struct{}
+		err = data.UnmarshalJSON(frame)
+		return &data, err
+	case *spb.Value:
+		data := spb.Value{}
+		frame, err := d.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		err = data.UnmarshalJSON(frame)
+		return &data, err
+	}
+	return nil, fmt.Errorf("data type %T is not structpb compatible", ival)
 }
 
 // ------------------------------------------------------------ //
@@ -155,9 +188,7 @@ func (n *ApiNote) fromMap(vm map[string]*spb.Value) {
 			}
 		}
 	}
-	if x, ok := vm["Data"]; ok {
-		n.data = x
-	}
+	n.data = vm["Data"]
 }
 
 // ------------------------------------------------------------------//
@@ -174,32 +205,23 @@ func (n ApiNote) Error() string {
 // Empty
 // ---------------------------------------------------------------//
 func (n ApiNote) Empty() bool {
-	return n.code == 0 && n.data == nil
+	return n.code == 0 && n.err == nil && n.data == nil
 }
 
 // ----------------------------------------------------------------//
 // Hardcopy
 // ----------------------------------------------------------------//
-func (n *ApiNote) Hardcopy() ApiNote {
-	c := ApiNote{
+func (n *ApiNote) Hardcopy() *ApiNote {
+	c := &ApiNote{
 		code: n.code,
 		err:  n.err,
 	}
-	switch x := n.data.(type) {
-	case *spb.Value:
-		c.data = x.AsInterface()
-	case map[string]interface{}:
-		y := map[string]interface{}{}
-		for k, v := range x {
-			y[k] = v
+	var err error
+	c.data, err = copyData(n.data)
+	if err != nil {
+		if c.err != nil {
+			c.err = fmt.Errorf("data error : %v : %w", err, c.err)
 		}
-		c.data = y
-	case []interface{}:
-		y := make([]interface{}, len(x))
-		copy(y, x)
-		c.data = y
-	default:
-		c.data = x
 	}
 	return c
 }
@@ -208,8 +230,12 @@ func (n *ApiNote) Hardcopy() ApiNote {
 // Is
 // ------------------------------------------------------------------//
 func (n ApiNote) Is(target error) bool {
-	_, matched := target.(*ApiNote)
-	return matched
+	if errors.Is(n.err, target) {
+		return true
+	} else if n.err != nil && target != nil {
+		return n.err.Error() == target.Error()
+	}
+	return false
 }
 
 // -------------------------------------------------------------- //
@@ -231,9 +257,36 @@ func (n ApiNote) Runware() *Strucex {
 // SetData
 // ----------------------------------------------------------------//
 func (n *ApiNote) SetData(data interface{}) error {
+	return n.setData(data)
+}
+
+// ----------------------------------------------------------------//
+// setData
+// ----------------------------------------------------------------//
+func (n *ApiNote) setData(ival interface{}) error {
 	var err error
-	n.data, err = stx.NewSpbValue(data)
-	return err
+	switch d := ival.(type) {
+	case nil:
+		n.data = nil
+	case []string:
+		data := make([]interface{}, len(d))
+		for i, v := range d {
+			data[i] = v
+		}
+		n.data, err = spb.NewValue(data)
+	case *stx.Strucex:
+		n.data = d.AsStruct()
+	case *spb.Struct, *spb.Value:
+		n.data = d
+	case stx.Strucex:
+		n.data = &d
+	default:
+		n.data, err = spb.NewValue(d)
+	}
+	if err != nil {
+		return fmt.Errorf("%T is not structpb compatible : %v", ival, err)
+	}
+	return nil
 }
 
 // ----------------------------------------------------------------//
@@ -265,7 +318,12 @@ func (n ApiNote) Unwrap() error {
 // Value
 // -------------------------------------------------------------//
 func (n *ApiNote) Value() interface{} {
-	return n.data
+	switch v := n.data.(type) {
+	case *spb.Value:
+		return v.AsInterface()
+	default:
+		return v
+	}
 }
 
 // ------------------------------------------------------------ //
@@ -277,7 +335,14 @@ func (n *ApiNote) With(code int, data interface{}) *ApiNote {
 	case error:
 		n.err = v
 	default:
-		n.data = data
+		err := n.setData(data)
+		if err != nil {
+			if n.err != nil {
+				n.err = fmt.Errorf("%v\ndata error : %v", n.err, err)
+			} else {
+				n.err = err
+			}
+		}
 	}
 	return n
 }

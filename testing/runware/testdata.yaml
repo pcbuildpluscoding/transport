@@ -10,7 +10,21 @@ AsMap:
     Key: application-xyz
     Metric: [apple, orange, banana]
 Bytes:
-  Code: 400
   Data: container restart failed
 ErrorAs:
   Error: test error
+testbookA:
+  all:
+    - tc_AsMap
+    - tc_Bicode
+    - tc_Bytes
+    - tc_Empty
+    - tc_Error
+    - tc_ErrorAs
+    - tc_Hardcopy
+    - tc_Is
+    - tc_Parameter
+    - tc_Runware
+    - tc_SetData
+    - tc_Value
+    - tc_With

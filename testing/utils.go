@@ -37,39 +37,24 @@ var dataPath = flag.String("dataPath", "", "input yaml datafile path for testing
 var dumpPath = flag.String("dumpPath", "/data/captainia/trovedb/bucketDump.txt", "system file path for bucket dump output")
 
 // ------------------------------------------------------------------//
-// encodeAny
+// getDataset
 // ------------------------------------------------------------------//
-func encodeAny(ival interface{}) ([]byte, error) {
-	var x *spb.Value
-
-	switch val := ival.(type) {
-	case string:
-		x = spb.NewStringValue(val)
-	case bool:
-		x = spb.NewBoolValue(val)
-	case float64:
-		x = spb.NewNumberValue(val)
-	case int:
-		x = spb.NewNumberValue(float64(val))
-	case map[string]interface{}:
-		v, err := spb.NewStruct(val)
-		if err != nil {
-			return nil, err
+func getDataset(tc_name string) map[string]interface{} {
+	switch tc_name {
+	case "tc_AsMap":
+		return map[string]interface{}{
+			"Code":  float64(400),
+			"Error": "container restart failed",
+			"Data": map[string]interface{}{
+				"Code": float64(402),
+				"Key":  "application-xyz",
+				"Metric": []interface{}{
+					"apple", "orange", "banana",
+				},
+			},
 		}
-		x = spb.NewStructValue(v)
-	case []interface{}:
-		v, err := spb.NewList(val)
-		if err != nil {
-			return nil, err
-		}
-		x = spb.NewListValue(v)
-	default:
-		return nil, fmt.Errorf("invalid structpb argument type : %T", ival)
 	}
-
-	logger.Infof("encoding test value : %v ...", x.AsInterface())
-
-	return x.MarshalJSON()
+	return map[string]interface{}{}
 }
 
 // ------------------------------------------------------------------//
@@ -208,6 +193,8 @@ func sumIntSlice(args ...interface{}) int {
 		switch z := y.(type) {
 		case *int:
 			x += *z
+		case float64:
+			x += int(z)
 		}
 	}
 	return x
