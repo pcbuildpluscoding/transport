@@ -15,9 +15,9 @@ import (
 )
 
 // ----------------------------------------------------------------//
-// TestTransport
+// TestApiNote
 // ----------------------------------------------------------------//
-func TestTransport(t *testing.T) {
+func TestApiNote(t *testing.T) {
 	tpt.SetLogger(logger)
 
 	rw, err := MarkupToRunware(*dataPath, true)
@@ -25,7 +25,7 @@ func TestTransport(t *testing.T) {
 		t.Fatalf("testdata loading error : %v", err)
 	}
 
-	t.Run("transport", func(t *testing.T) {
+	t.Run("ApiNote", func(t *testing.T) {
 		if tcslice, err := getTestbookA(rw, *testcases); err != nil {
 			t.Fatal(err)
 		} else {
@@ -121,14 +121,14 @@ func tc_ErrorAs(t *testing.T, rw *stx.Strucex) error {
 	assert.NilError(t, err, "assert-0")
 	assert.Assert(t, y.Unwrap() != nil, "assert-1")
 
-	assert.Assert(t, y.ErrorAs(&err), "assert-2")
+	assert.Assert(t, y.As(&err), "assert-2")
 	assert.Assert(t, err != nil, "assert-3")
 	assert.Equal(t, "test error", err.Error(), "assert-4")
 
 	errA := stx.NewNilPathError("foo/bar")
-	y = y.WithErr(errA)
+	y = y.With(400, errA)
 
-	assert.Assert(t, y.ErrorAs(&err), "assert-5")
+	assert.Assert(t, y.As(&err), "assert-5")
 	assert.Assert(t, err != nil, "assert-6")
 	assert.Equal(t, "foo/bar does not exist", err.Error(), "assert-7")
 
@@ -195,13 +195,13 @@ func tc_Hardcopy(t *testing.T, rw *stx.Strucex) error {
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
 	assert.NilError(t, err, "assert-0")
-	y := x.Hardcopy()
+	y := x.Copy()
 	assert.NilError(t, err, "assert-1")
 	assert.Equal(t, reflect.TypeOf(x.Value()), reflect.TypeOf(y.Value()), "assert-2")
 	x, _ = tpt.NewApiRecord(nil)
 
 	y = x.With(0, rw.Struct("Data"))
-	z := y.Hardcopy()
+	z := y.Copy()
 	assert.NilError(t, err, "assert-3")
 	assert.Equal(t, reflect.TypeOf(y.Value()), reflect.TypeOf(z.Value()), "assert-4")
 	err = y.Runware().Set("Key", "application-abc")
@@ -281,6 +281,10 @@ func tc_Runware(t *testing.T, rw *stx.Strucex) error {
 	assert.NilError(t, z.Unwrap(), "assert-5")
 	assert.Equal(t, 505, z.Int("Code"), "assert-6")
 	assert.Equal(t, "ab51cf5a-ab92-11ee-9946-abe5079abce3", z.String("JobId"), "assert-7")
+
+	z = x.With(0, *rw).Runware()
+	assert.NilError(t, z.Unwrap(), "assert-8")
+	assert.Equal(t, 402, z.Int("Data/Code"), "assert-9")
 
 	logger.Debugf("tc_Runware is complete ...")
 	return nil

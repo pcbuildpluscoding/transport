@@ -4,16 +4,13 @@
 package transport
 
 import (
-	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"math"
 	"net"
-	"os"
 	"syscall"
-	"time"
 )
 
 var ErrConnexCancelled = errors.New("network connection was cancelled")
@@ -54,23 +51,6 @@ func GetReply(r io.Reader) *ApiNote {
 }
 
 // ----------------------------------------------------------------//
-// NetError
-// ----------------------------------------------------------------//
-func NetError(err error) bool {
-	switch {
-	case err == nil:
-		return false
-	case errors.Is(err, io.EOF):
-		return true
-	case errors.Is(err, io.ErrUnexpectedEOF):
-		return true
-	default:
-		_, isNetErr := err.(*net.OpError)
-		return isNetErr
-	}
-}
-
-// ----------------------------------------------------------------//
 // ParseHeader
 // ----------------------------------------------------------------//
 func ParseHeader(frame []byte, flag byte) []byte {
@@ -95,70 +75,6 @@ func ParseHeader(frame []byte, flag byte) []byte {
 		header[1] = byte(fsize)
 	}
 	return header[:hsize]
-}
-
-// ----------------------------------------------------------------//
-// ReadWC - read with connector
-// ----------------------------------------------------------------//
-func ReadWC(c context.Context, conn net.Conn, timeout int, frame []byte, desc string) error {
-	i := 0
-	for i < len(frame) {
-		select {
-		case <-c.Done():
-			logger.Debugf("%s cancelled by supervisor ...", desc)
-			return ErrConnexCancelled
-		default:
-			err := conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
-			if err != nil {
-				return err
-			}
-			n, err := conn.Read(frame)
-			if errors.Is(err, os.ErrDeadlineExceeded) {
-				logger.Debugf("read deadline[%d] exceeded ...", timeout)
-				continue
-			} else if err != nil {
-				return err
-			}
-			i += n
-		}
-	}
-	return nil
-}
-
-// ----------------------------------------------------------------//
-// ReadWHC - read with header with connector
-// ----------------------------------------------------------------//
-func ReadWHC(c context.Context, conn net.Conn, timeout int, desc string) ([]byte, error) {
-	var (
-		header [2]byte
-		extHdr [4]byte
-	)
-	// read the header
-	err := ReadWC(c, conn, timeout, header[:], desc)
-	if err != nil {
-		return nil, err
-	}
-
-	flag := Flag(header[0])
-	// Determine the actual length of the body
-	fsize := uint32(header[1])
-	// Determine the actual length of the body
-	if flag.IsLarge() {
-		extHdr[0] = header[1]
-		err = ReadWC(c, conn, timeout, extHdr[1:], desc)
-		if err != nil {
-			return nil, err
-		}
-		fsize = binary.BigEndian.Uint32(extHdr[:])
-	}
-
-	if fsize > uint32(math.MaxUint32) {
-		return nil, ErrOverflow
-	}
-
-	frame := make([]byte, fsize)
-	err = ReadWC(c, conn, timeout, frame, desc)
-	return frame, err
 }
 
 // ----------------------------------------------------------------//
@@ -192,7 +108,7 @@ func ReadWH(r io.Reader) (Flag, []byte, error) {
 	)
 	// read the header
 	err = Read(r, header[:])
-	if NetError(err) {
+	if err != nil {
 		return 0, nil, err
 	}
 
@@ -203,7 +119,7 @@ func ReadWH(r io.Reader) (Flag, []byte, error) {
 	if flag.IsLarge() {
 		extHdr[0] = header[1]
 		err = Read(r, extHdr[1:])
-		if NetError(err) {
+		if err != nil {
 			return 0, nil, err
 		}
 		fsize = binary.BigEndian.Uint32(extHdr[:])
@@ -216,7 +132,7 @@ func ReadWH(r io.Reader) (Flag, []byte, error) {
 	frame := make([]byte, fsize)
 	err = Read(r, frame)
 
-	if NetError(err) {
+	if err != nil {
 		return 0, nil, err
 	}
 	return flag, frame, nil
@@ -253,7 +169,7 @@ func Write(w io.Writer, frame []byte) error {
 
 	for total := 0; total < len(frame); total += n {
 		n, err = w.Write(frame[total:])
-		if NetError(err) {
+		if err != nil {
 			return err
 		}
 	}
@@ -266,7 +182,7 @@ func Write(w io.Writer, frame []byte) error {
 func WriteWH(w io.Writer, frame []byte, flag byte) error {
 	header := ParseHeader(frame, flag)
 	err := Write(w, header)
-	if NetError(err) {
+	if err != nil {
 		return err
 	}
 
@@ -302,65 +218,6 @@ func WritePacket(w io.Writer, packet ...[]byte) error {
 		err := WriteWH(w, frame, flag)
 		if err != nil {
 			return fmt.Errorf("failed sending frame %d of %d : %w", i+1, last+1, err)
-		}
-	}
-	return nil
-}
-
-// ----------------------------------------------------------------//
-// WriteWC - write with connector
-// ----------------------------------------------------------------//
-func WriteWC(c context.Context, conn net.Conn, timeout int, frame []byte, desc string) error {
-	i := 0
-	for i < len(frame) {
-		select {
-		case <-c.Done():
-			logger.Debugf("%s cancelled by supervisor ...", desc)
-			return ErrConnexCancelled
-		default:
-			err := conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
-			if err != nil {
-				return err
-			}
-			n, err := conn.Write(frame)
-			if errors.Is(err, os.ErrDeadlineExceeded) {
-				logger.Debugf("write deadline[%d] exceeded ...", timeout)
-				continue
-			} else if err != nil {
-				return err
-			}
-			i += n
-		}
-	}
-	return nil
-}
-
-// -------------------------------------------------------------- //
-// WriteWHC - write with header with connector
-// ---------------------------------------------------------------//
-func WriteWHC(c context.Context, conn net.Conn, timeout int, frame []byte, flag byte, desc string) error {
-	header := ParseHeader(frame, flag)
-	err := WriteWC(c, conn, timeout, header, desc)
-	if err != nil {
-		return err
-	}
-	return WriteWC(c, conn, timeout, frame, desc)
-}
-
-// ----------------------------------------------------------------//
-// WritePacketWC - write packet with connector
-// ----------------------------------------------------------------//
-func WritePacketWC(c context.Context, conn net.Conn, timeout int, desc string, packet ...[]byte) error {
-	var flag byte
-	last := len(packet) - 1
-	for i, frame := range packet {
-		flag = SNDMORE
-		if i == last {
-			flag = 0
-		}
-		err := WriteWHC(c, conn, timeout, frame, flag, desc)
-		if err != nil {
-			return fmt.Errorf("failed sending frame %d of %d : %v", i+1, last+1, err)
 		}
 	}
 	return nil

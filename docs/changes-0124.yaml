@@ -7,60 +7,102 @@ apinote.go:
       type switch should check string type since if the data type was byte when encoded before transmission
       the type that is decoded will be string instead of byte because structpb converts []byte to string for
       protobuf compatibility
+    task done: 5 Jan 2024
   - source: method/ErrorAs
     kind: improvement
     date: 4 Jan 2024
-    source version: 42fa8a1
+    source version: 5227564
     notes: |
       rename from ErrorAs to As
+    task done: 6 Jan 2024
   - source: method/Hardcopy
     date: 2 Jan 2024
-    source version: 42fa8a1
+    source version: 5227564
     notes : |
       a. Hardcopy is not needed, copy is a more sensible name. 
       b. the copy value type check does not handle *spb.Value correctly. The copy type should be *spb.Value and 
          not the derived interface{} value.
       c. the copy data interface{} treatment should correspond to the asVMap method.
+    task done: 6 Jan 2024
   - source: type/ApiNote
     date: 2 Jan 2024
-    source version: 42fa8a1
+    source version: 5227564
     notes: |
-      remove the timestamp field and associated util functions
+      remove the timestamp field and associated code in methods and util functions, as a timestamp can easily be
+      applied to a map value assigned to ApiNote.Data
+    task done: 6 Jan 2024
   - source: method/fromMap
     date: 2 Jan 2024
-    source version: 42fa8a1
+    source version: 5227564
     notes: |
       remove the map[string]interface{} key existance checks
+    task:
+      review date: 6 Jan 2024
+      notes: this advice is wrong and is rejected!
   - source: method/WithErr
     date: 2 Jan 2024
-    source version: 42fa8a1
+    source version: 5227564
     notes: |
       consider removing the WithErr method because the With method is equivalent and should not 'compete' with 
-      another method. My senior engineer says this is valid, but because it is a breaking change we have to wait
+      another method. Also, WithErr set a default code == 500 which is ok for prototype development but not for a
+      production release scope. This change may be valid, but because it is a breaking change we have to wait
       until the right time.
+    done date: 6 Jan 2024
   - source: method/Is
     date: 4 Jan 2024
     source version: 42fa8a1
     notes: |
       ApiNote.Is should compare the argument err to the embedded err, not to itself eventhough it qualifies as
       as error, having an Error() string method
+    done date: 5 Jan 2024
   - source: type/ApiNote
     date: 5 Jan 2024
-    source version: 42fa8a1
+    source version: 5227564
     notes: rearrange methods in alphabetical order
+    done date: 6 Jan 2024
+  - source: type/ApiResult/method/CheckErr
+    date: 6 Jan 2024
+    source version: 5227564
+    notes: |
+      similar to ApiNote.WithErr, but this one has a bug. If it is an error but no errcode is optionally provided
+      then the returned record contains a non-error code of 200.
+    task:
+      done date: 6 Jan 2024
+      note: see bug-tracker for details
+  - source: method/fromMap
+    date: 6 Jan 2024
+    source version: to-be-advised
+    notes: |
+      remove the check for an ApiError key because ApiError is now marked as redundant
 ioutils.go:
-  date: 2 Jan 2024
-  source version: 42fa8a1
-  notes : |
-    a. remove all the 'with connector' methods, better to handle read and write timeout in the calling code
-    b. remove NetError function
+  - source: all
+    date: 2 Jan 2024
+    source version: 42fa8a1
+    notes: |
+      a. remove all the 'with connector' methods, better to handle read and write timeout in the calling code
+      b. remove NetError function
+  - source: [function/GetReply, function/Closure, const/ErrConnexCancelled]
+    date: 6 Jan 2024
+    source version: to-be-advised
+    notes: |
+      a. remove GetReply as specific error codes may need to be applied, which can't handled by an argument unless
+         it is a map which indicates that the function is not useful for a production scoped application.
+      b. remove Closure as next-gen Connware and ApiReceiver handle conn closure by the net.ErrClosed error
+      c. remove the ErrConnexCancelled constant as conn cancellation handling is no longer a transport feature
 base.go:
   date: 2 Jan 2024
   source version: 42fa8a1
   notes: |
     consider moving the timestamp constants to the types package
 utils.go:
-  date: 5 Jan 2024
-  source version: 42fa8a1
-  notes: |
-    consider removing redundant lines 197 & 198
+  - source: function/HasErrKind
+    date: 5 Jan 2024
+    source version: to-be-advised
+    notes: |
+      consider removing redundant lines 197 & 198
+  - source: type/ApiError
+    date: 6 Jan 2024
+    source version: to-be-advised
+    notes: |
+      remove ApiError as it now classified redundant, since the Key field which is unique compared to ApiNote can 
+      easily be added to a map value assigned to ApiNote.Data

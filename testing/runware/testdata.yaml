@@ -28,3 +28,7 @@ testbookA:
     - tc_SetData
     - tc_Value
     - tc_With
+testbookB:
+  all:
+    - tcb_CheckErr
+    - tcb_With

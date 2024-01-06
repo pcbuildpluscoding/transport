@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"time"
 
 	stx "github.com/pcbuildpluscoding/strucex/std"
 	spb "google.golang.org/protobuf/types/known/structpb"
@@ -17,16 +16,15 @@ import (
 // ApiNote
 // ================================================================//
 type ApiNote struct {
-	code      int
-	err       error
-	data      interface{}
-	timestamp interface{}
+	code int
+	err  error
+	data interface{}
 }
 
 // ------------------------------------------------------------------//
 // As
 // ------------------------------------------------------------------//
-func (n *ApiNote) ErrorAs(target interface{}) bool {
+func (n *ApiNote) As(target interface{}) bool {
 	return ErrorAs(n.err, target)
 }
 
@@ -50,19 +48,11 @@ func (n *ApiNote) asVMap() map[string]*spb.Value {
 		x["Error"] = spb.NewStringValue(n.err.Error())
 	}
 
-	var err error
-
-	if n.timestamp != nil {
-		x["Timestamp"], err = GetTimestampA("", n.timestamp)
-	}
 	if n.data == nil {
 		return x
 	}
 
-	if err != nil {
-		panic(fmt.Errorf("ApiNote timestamp value is not a valid structpb type : %v", err))
-	}
-
+	var err error
 	switch d := n.data.(type) {
 	case *spb.ListValue:
 		x["Data"] = spb.NewListValue(d)
@@ -102,6 +92,24 @@ func (n *ApiNote) Bytes() ([]byte, error) {
 // ----------------------------------------------------------------//
 func (n *ApiNote) Code() int {
 	return n.code
+}
+
+// ----------------------------------------------------------------//
+// Copy
+// ----------------------------------------------------------------//
+func (n *ApiNote) Copy() *ApiNote {
+	c := &ApiNote{
+		code: n.code,
+		err:  n.err,
+	}
+	var err error
+	c.data, err = copyData(n.data)
+	if err != nil {
+		if c.err != nil {
+			c.err = fmt.Errorf("data error : %v : %w", err, c.err)
+		}
+	}
+	return c
 }
 
 // ----------------------------------------------------------------//
@@ -165,9 +173,6 @@ func (n *ApiNote) fromMap(vm map[string]*spb.Value) {
 	if x, ok := vm["Code"]; ok {
 		n.code = int(x.GetNumberValue())
 	}
-	if x, ok := vm["Timestamp"]; ok {
-		n.timestamp = x.AsInterface()
-	}
 	if x, ok := vm["Error"]; ok {
 		if errtxt := x.GetStringValue(); errtxt != "" {
 			n.err = errors.New(errtxt)
@@ -206,24 +211,6 @@ func (n ApiNote) Error() string {
 // ---------------------------------------------------------------//
 func (n ApiNote) Empty() bool {
 	return n.code == 0 && n.err == nil && n.data == nil
-}
-
-// ----------------------------------------------------------------//
-// Hardcopy
-// ----------------------------------------------------------------//
-func (n *ApiNote) Hardcopy() *ApiNote {
-	c := &ApiNote{
-		code: n.code,
-		err:  n.err,
-	}
-	var err error
-	c.data, err = copyData(n.data)
-	if err != nil {
-		if c.err != nil {
-			c.err = fmt.Errorf("data error : %v : %w", err, c.err)
-		}
-	}
-	return c
 }
 
 // ------------------------------------------------------------------//
@@ -279,7 +266,7 @@ func (n *ApiNote) setData(ival interface{}) error {
 	case *spb.Struct, *spb.Value:
 		n.data = d
 	case stx.Strucex:
-		n.data = &d
+		n.data = d.AsStruct()
 	default:
 		n.data, err = spb.NewValue(d)
 	}
@@ -287,24 +274,6 @@ func (n *ApiNote) setData(ival interface{}) error {
 		return fmt.Errorf("%T is not structpb compatible : %v", ival, err)
 	}
 	return nil
-}
-
-// ----------------------------------------------------------------//
-// SetTimestamp
-// ----------------------------------------------------------------//
-func (n *ApiNote) SetTimestamp() {
-	n.timestamp = time.Now()
-}
-
-// ----------------------------------------------------------------//
-// Timestamp
-// ----------------------------------------------------------------//
-func (n *ApiNote) Timestamp(format ...string) string {
-	timestamp, err := GetTimestamp(n.timestamp, format...)
-	if err != nil {
-		panic(err)
-	}
-	return timestamp
 }
 
 // ------------------------------------------------------------------//
@@ -348,21 +317,6 @@ func (n *ApiNote) With(code int, data interface{}) *ApiNote {
 }
 
 // ----------------------------------------------------------------//
-// WithErr
-// ----------------------------------------------------------------//
-func (n *ApiNote) WithErr(err error, code ...int) *ApiNote {
-	n.code = 200
-	if err != nil {
-		n.err = err
-		n.code = 400
-		if code != nil && code[0] > 400 {
-			n.code = code[0]
-		}
-	}
-	return n
-}
-
-// ----------------------------------------------------------------//
 // Withf
 // ----------------------------------------------------------------//
 func (n *ApiNote) Withf(code int, format string, args ...interface{}) *ApiNote {
@@ -396,13 +350,13 @@ type ApiResult struct{}
 // ----------------------------------------------------------------//
 // CheckErr
 // ----------------------------------------------------------------//
-func (ApiResult) CheckErr(err error, code ...int) *ApiNote {
+func (ApiResult) CheckErr(errcode int, err error, success_code ...int) *ApiNote {
 	x := &ApiNote{code: 200}
 	if err != nil {
+		x.code = errcode
 		x.err = err
-		if code != nil {
-			x.code = code[0]
-		}
+	} else if success_code != nil {
+		x.code = success_code[0]
 	}
 	return x
 }
@@ -416,68 +370,9 @@ func (ApiResult) With(code int, data interface{}) *ApiNote {
 }
 
 // ----------------------------------------------------------------//
-// WithErr
-// ----------------------------------------------------------------//
-func (ApiResult) WithErr(err error, code ...int) *ApiNote {
-	x := ApiNote{}
-	return x.WithErr(err, code...)
-}
-
-// ----------------------------------------------------------------//
 // Withf
 // ----------------------------------------------------------------//
 func (ApiResult) Withf(code int, format string, args ...interface{}) *ApiNote {
 	x := ApiNote{}
 	return x.Withf(code, format, args...)
-}
-
-// ------------------------------------------------------------------//
-// Utils
-// ------------------------------------------------------------------//
-// ------------------------------------------------------------------//
-// GetTimestamp
-// ------------------------------------------------------------------//
-func GetTimestamp(ival interface{}, format ...string) (string, error) {
-	switch v := ival.(type) {
-	case map[string]interface{}:
-		xa := v
-		if xb, ok := xa["TimeAt"]; ok {
-			if xc, ok := xb.(int64); ok {
-				return GetTimestampB(time.UnixMicro(xc), format...), nil
-			}
-			return "", fmt.Errorf("ApiNote timestamp error, unexpected TimeAt datatype : %T", xb)
-		}
-		return "", fmt.Errorf("ApiNote timestamp error, required TimeAt field is undefined")
-	case time.Time:
-		return GetTimestampB(v, format...), nil
-	case string:
-		return v, nil
-	}
-	return "", fmt.Errorf("ApiNote timestamp error, unexpected datatype : %T", ival)
-}
-
-// ------------------------------------------------------------------//
-// GetTimestampA
-// ------------------------------------------------------------------//
-func GetTimestampA(formatArg string, i ...interface{}) (*spb.Value, error) {
-	if i == nil || i[0] == nil {
-		timestamp := GetTimestampB(time.Now(), formatArg)
-		return spb.NewStringValue(timestamp), nil
-	}
-	timestamp := map[string]interface{}{
-		"Context": i[0],
-		"TimeAt":  time.Now().UnixMicro(),
-	}
-	return spb.NewValue(timestamp)
-}
-
-// ------------------------------------------------------------------//
-// GetTimestampB
-// ------------------------------------------------------------------//
-func GetTimestampB(t time.Time, formatArg ...string) string {
-	format := "2006-01-02_15:04:05.000000"
-	if formatArg != nil && formatArg[0] != "" {
-		format = formatArg[0]
-	}
-	return t.Format(format)
 }

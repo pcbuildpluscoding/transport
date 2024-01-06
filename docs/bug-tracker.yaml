@@ -33,3 +33,18 @@
     notes: |
       it tests if the argument type == *ApiNote which is not correct. Instead it should test if the error strings
       of each argument are equal. Return true if yes, otherwise call errors.Is(n.err, target)
+  - date: 6 Jan 2024
+    source: ApiNote.setData - line 282
+    notes: |
+      setData type check for stx.Strucex did not convert to *spb.Struct and thus for Runware conversion Strucex is
+      incompatible with stx.Importe type checking which returns an error
+    source version: 5227564
+    new version: current working content
+  - date: 6 Jan 2024
+    source: ApiResult.CheckErr - line 400 and 407
+    notes: |
+      CheckErr does not have a errcode argument only an optional one. The method does not apply a default errcode 
+      if the optional errcode is nil AND the err is found to be != nil.
+      the proposed fix is to add a proper errcode argument that is set IF the err != nil. the optional code will now
+      only be considered as an optional success code which otherwise = 200
+    source version: 5227564
