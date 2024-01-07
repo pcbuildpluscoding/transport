@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type tcActor func(*testing.T, *stx.Strucex) error
+type tcActor func(*testing.T, *stx.Strucex, interface{}) error
 type Testcase struct {
 	actor   tcActor
 	name    string
@@ -33,6 +33,8 @@ var createBucket = flag.Bool("create", false, "create a new db bucket")
 var testcases = flag.String("testcases", "", "comma separated list of testcases to run")
 
 var dataPath = flag.String("dataPath", "", "input yaml datafile path for testing")
+
+var hugeDataPath = flag.String("hugeDataPath", "", "huge input test file for write timeout testing")
 
 var dumpPath = flag.String("dumpPath", "/data/captainia/trovedb/bucketDump.txt", "system file path for bucket dump output")
 

@@ -34,7 +34,7 @@ func TestApiNote(t *testing.T) {
 					t.Fatalf("testcase |%s| is undefined", tc.name)
 				} else if !rw.HasKeys(tc.dataKey) {
 					t.Fatalf("%s dataKey does not exist in dataset", tc.name)
-				} else if err := tc.actor(t, rw.SubNode(tc.dataKey, false).Copy()); err != nil {
+				} else if err := tc.actor(t, rw.SubNode(tc.dataKey, false).Copy(), nil); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -45,7 +45,7 @@ func TestApiNote(t *testing.T) {
 // ----------------------------------------------------------------//
 // tc_AsMap
 // ----------------------------------------------------------------//
-func tc_AsMap(t *testing.T, rw *stx.Strucex) error {
+func tc_AsMap(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_AsMap ...")
 
 	y, err := tpt.NewApiRecord(rw.AsStruct())
@@ -65,7 +65,7 @@ func tc_AsMap(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Bicode
 // ----------------------------------------------------------------//
-func tc_Bicode(t *testing.T, rw *stx.Strucex) error {
+func tc_Bicode(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Bicode ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -92,7 +92,7 @@ func tc_Bicode(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Bytes
 // ----------------------------------------------------------------//
-func tc_Bytes(t *testing.T, rw *stx.Strucex) error {
+func tc_Bytes(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Bytes ...")
 
 	x, err := tpt.NewApiRecord(nil)
@@ -114,7 +114,7 @@ func tc_Bytes(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_ErrorAs
 // ----------------------------------------------------------------//
-func tc_ErrorAs(t *testing.T, rw *stx.Strucex) error {
+func tc_ErrorAs(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_ErrorAs ...")
 
 	y, err := tpt.NewApiRecord(rw.AsStruct())
@@ -139,7 +139,7 @@ func tc_ErrorAs(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Empty
 // ----------------------------------------------------------------//
-func tc_Empty(t *testing.T, rw *stx.Strucex) error {
+func tc_Empty(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Empty ...")
 
 	x, err := tpt.NewApiRecord(nil)
@@ -167,7 +167,7 @@ func tc_Empty(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Error
 // ----------------------------------------------------------------//
-func tc_Error(t *testing.T, rw *stx.Strucex) error {
+func tc_Error(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Error ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -190,7 +190,7 @@ func tc_Error(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Hardcopy
 // ----------------------------------------------------------------//
-func tc_Hardcopy(t *testing.T, rw *stx.Strucex) error {
+func tc_Hardcopy(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Hardcopy ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -222,7 +222,7 @@ func (e *TestError) Error() string {
 // ----------------------------------------------------------------//
 // tc_Is
 // ----------------------------------------------------------------//
-func tc_Is(t *testing.T, rw *stx.Strucex) error {
+func tc_Is(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Is ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -243,7 +243,7 @@ func tc_Is(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Parameter
 // ----------------------------------------------------------------//
-func tc_Parameter(t *testing.T, rw *stx.Strucex) error {
+func tc_Parameter(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Parameter ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -263,7 +263,7 @@ func tc_Parameter(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Runware
 // ----------------------------------------------------------------//
-func tc_Runware(t *testing.T, rw *stx.Strucex) error {
+func tc_Runware(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Runware ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -293,7 +293,7 @@ func tc_Runware(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_SetData
 // ----------------------------------------------------------------//
-func tc_SetData(t *testing.T, rw *stx.Strucex) error {
+func tc_SetData(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_SetData ...")
 
 	x, err := tpt.NewApiRecord(nil)
@@ -321,7 +321,7 @@ func tc_SetData(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Value
 // ----------------------------------------------------------------//
-func tc_Value(t *testing.T, rw *stx.Strucex) error {
+func tc_Value(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Value ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -347,7 +347,7 @@ func tc_Value(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_With
 // ----------------------------------------------------------------//
-func tc_With(t *testing.T, rw *stx.Strucex) error {
+func tc_With(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_With ...")
 
 	x, _ := tpt.NewApiRecord(nil)

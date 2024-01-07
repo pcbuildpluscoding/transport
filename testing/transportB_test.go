@@ -32,7 +32,7 @@ func TestApiResult(t *testing.T) {
 					t.Fatalf("testcase |%s| is undefined", tc.name)
 				} else if !rw.HasKeys(tc.dataKey) {
 					t.Fatalf("%s dataKey does not exist in dataset", tc.name)
-				} else if err := tc.actor(t, rw.SubNode(tc.dataKey, false).Copy()); err != nil {
+				} else if err := tc.actor(t, rw.SubNode(tc.dataKey, false).Copy(), nil); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -43,7 +43,7 @@ func TestApiResult(t *testing.T) {
 // ----------------------------------------------------------------//
 // tcb_CheckErr
 // ----------------------------------------------------------------//
-func tcb_CheckErr(t *testing.T, rw *stx.Strucex) error {
+func tcb_CheckErr(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_CheckErr ...")
 
 	x := tpt.ApiResult{}
@@ -75,7 +75,7 @@ func tcb_CheckErr(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tcb_With
 // ----------------------------------------------------------------//
-func tcb_With(t *testing.T, rw *stx.Strucex) error {
+func tcb_With(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_With ...")
 
 	x := tpt.ApiResult{}

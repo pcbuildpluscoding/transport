@@ -74,6 +74,12 @@ apinote.go:
     source version: to-be-advised
     notes: |
       remove the check for an ApiError key because ApiError is now marked as redundant
+  - source: method/With
+    date: 7 Jan 2024
+    source version: to-be-advised
+    notes: |
+      sometimes for error handling, the need to add qualifying data with the error is required.
+      therefore, a variadic 3rd data argument is needed which is exclusively for data
 ioutils.go:
   - source: all
     date: 2 Jan 2024

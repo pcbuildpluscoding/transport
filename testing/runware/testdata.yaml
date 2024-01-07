@@ -13,6 +13,13 @@ Bytes:
   Data: container restart failed
 ErrorAs:
   Error: test error
+TestClient:
+  Request:
+    JobId: 04135d7a-ac74-11ee-9946-abe5079abce3
+  RemoteAddr: '127.0.0.1:9090'
+  ReadTimeout: 10
+  WriteTimeout: 10
+  WriteBufferSize: 1024
 testbookA:
   all:
     - tc_AsMap
