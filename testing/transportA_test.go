@@ -155,7 +155,7 @@ func tc_Empty(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	assert.Assert(t, y.Empty(), "assert-7")
 	y = y.With(0, "foo")
 	assert.Assert(t, !y.Empty(), "assert-8")
-	y = y.With(0, nil)
+	y = y.With(0, nil, nil)
 	assert.Assert(t, y.Empty(), "assert-9")
 	y = y.With(0, errors.New("for assert-10"))
 	assert.Assert(t, !y.Empty(), "assert-10")
@@ -374,6 +374,45 @@ func tc_With(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	y = x.Withf(500, "a testing error")
 	y = y.Wrapf(500, "another testing error")
 	assert.Equal(t, "another testing error : a testing error", y.Error(), "assert-12")
+
+	x, _ = tpt.NewApiRecord(nil)
+	err := errors.New("something broke")
+	y = x.With(400, err, 1234)
+	assert.Equal(t, 400, y.Code(), "assert-13")
+	assert.Equal(t, "something broke", y.Error(), "assert-14")
+	assert.Equal(t, 1234, y.Parameter().Int(), "assert-15")
+	err = errors.New("just now!")
+	y = y.Wrapf(500, "something else broke : %v", err)
+	assert.Equal(t, 500, y.Code(), "assert-16")
+	// logger.Debugf("wrapped error : |%s|", y.Error())
+	assert.Equal(t, "something else broke : just now! : something broke", y.Error(), "assert-17")
+	assert.Equal(t, 1234, y.Parameter().Int(), "assert-18")
+	y = y.With(501, nil, map[string]interface{}{
+		"foo": "bar",
+	})
+	assert.Equal(t, 501, y.Code(), "assert-19")
+	assert.Equal(t, "something else broke : just now! : something broke", y.Error(), "assert-20")
+	assert.Equal(t, "bar", y.Runware().String("foo"), "assert-21")
+
+	y = y.With(503, []string{"a new", "data", "kind"})
+	assert.Equal(t, "a new data kind", stringify(y.Parameter().StringList(), " "), "assert-22")
+
+	r := tpt.ApiResult{}
+	err = errors.New("something broke")
+	y = r.With(400, err, 1234)
+	assert.Equal(t, 400, y.Code(), "assert-23")
+	assert.Equal(t, "something broke", y.Error(), "assert-24")
+	assert.Equal(t, 1234, y.Parameter().Int(), "assert-25")
+
+	y = r.With(503, []string{"a new", "data", "kind"})
+	assert.Equal(t, 503, y.Code(), "assert-26")
+	assert.NilError(t, y.Unwrap(), "assert-27")
+	assert.Equal(t, "a new data kind", stringify(y.Parameter().StringList(), " "), "assert-28")
+
+	y = y.With(500, errors.New("small error"), errors.New("data error"))
+	assert.Equal(t, 500, y.Code(), "assert-28")
+	assert.Equal(t, "small error", y.Error(), "assert-29")
+	assert.Equal(t, "data error", y.Parameter().String(), "assert-30")
 
 	logger.Debugf("tc_With is complete ...")
 	return nil

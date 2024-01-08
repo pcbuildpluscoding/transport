@@ -77,10 +77,11 @@ apinote.go:
     done date: 8 Jan 2024
   - source: method/With
     date: 7 Jan 2024
-    source version: to-be-advised
+    source version: 8aee8c2
     notes: |
       sometimes for error handling, the need to add qualifying data with the error is required.
       therefore, a variadic 3rd data argument is needed which is exclusively for data
+    done date: 8 Jan 2024
 ioutils.go:
   - source: all
     date: 2 Jan 2024

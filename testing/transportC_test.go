@@ -90,7 +90,7 @@ func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 
 	req = rw.SubNode("Request", false).Copy()
 	_ = req.Set("Action", "WriteTimeout")
-	_ = req.Set("WriteTimeout", rw.Int("WriteTimeout")*2)
+	_ = req.Set("WriteTimeout", rw.Int("WriteTimeout")+2)
 	logger.Debugf("sending async request : %v", req.AsMap())
 	err := tc.AsyncRequest(req)
 	if err != nil {

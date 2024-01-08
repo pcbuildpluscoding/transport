@@ -283,19 +283,34 @@ func (n *ApiNote) Value() interface{} {
 // ------------------------------------------------------------ //
 // With
 // -------------------------------------------------------------//
-func (n *ApiNote) With(code int, data interface{}) *ApiNote {
+func (n *ApiNote) With(code int, union interface{}, data ...interface{}) *ApiNote {
+	f := func(d interface{}) {
+		err := n.setData(d)
+		if err != nil {
+			if n.err != nil {
+				n.err = fmt.Errorf("data error : %v : %w", err, n.err)
+			} else {
+				n.err = fmt.Errorf("data error : %v", err)
+			}
+		}
+	}
 	n.code = code
-	switch v := data.(type) {
+	switch v := union.(type) {
+	case nil:
 	case error:
 		n.err = v
 	default:
-		err := n.setData(data)
-		if err != nil {
-			if n.err != nil {
-				n.err = fmt.Errorf("%v\ndata error : %v", n.err, err)
-			} else {
-				n.err = err
-			}
+		f(union)
+	}
+	if data != nil {
+		if data[0] == nil {
+			n.data = nil
+		}
+		switch v := data[0].(type) {
+		case error: // not expected but must be detected
+			n.data = v.Error()
+		default:
+			f(data[0])
 		}
 	}
 	return n
@@ -349,9 +364,9 @@ func (ApiResult) CheckErr(errcode int, err error, success_code ...int) *ApiNote 
 // ----------------------------------------------------------------//
 // WithCode
 // ----------------------------------------------------------------//
-func (ApiResult) With(code int, data interface{}) *ApiNote {
+func (ApiResult) With(code int, union interface{}, data ...interface{}) *ApiNote {
 	x := ApiNote{}
-	return x.With(code, data)
+	return x.With(code, union, data...)
 }
 
 // ----------------------------------------------------------------//
