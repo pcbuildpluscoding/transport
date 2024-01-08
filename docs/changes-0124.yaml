@@ -71,9 +71,10 @@ apinote.go:
       note: see bug-tracker for details
   - source: method/fromMap
     date: 6 Jan 2024
-    source version: to-be-advised
+    source version: b1b6d6a
     notes: |
       remove the check for an ApiError key because ApiError is now marked as redundant
+    done date: 8 Jan 2024
   - source: method/With
     date: 7 Jan 2024
     source version: to-be-advised
@@ -89,7 +90,7 @@ ioutils.go:
       b. remove NetError function
   - source: [function/GetReply, function/Closure, const/ErrConnexCancelled]
     date: 6 Jan 2024
-    source version: to-be-advised
+    source version: b1b6d6a
     notes: |
       a. remove GetReply as specific error codes may need to be applied, which can't handled by an argument unless
          it is a map which indicates that the function is not useful for a production scoped application.
@@ -112,12 +113,14 @@ base.go:
 utils.go:
   - source: function/HasErrKind
     date: 5 Jan 2024
-    source version: to-be-advised
+    source version: b1b6d6a
     notes: |
       consider removing redundant lines 197 & 198
+    done date: 8 Jan 2024
   - source: type/ApiError
     date: 6 Jan 2024
-    source version: to-be-advised
+    source version: b1b6d6a
     notes: |
       remove ApiError as it now classified redundant, since the Key field which is unique compared to ApiNote can 
       easily be added to a map value assigned to ApiNote.Data
+    done date: 8 Jan 2024
