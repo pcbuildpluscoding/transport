@@ -95,6 +95,15 @@ ioutils.go:
          it is a map which indicates that the function is not useful for a production scoped application.
       b. remove Closure as next-gen Connware and ApiReceiver handle conn closure by the net.ErrClosed error
       c. remove the ErrConnexCancelled constant as conn cancellation handling is no longer a transport feature
+    task:
+      review: |
+        items a and b are valid but c is not as other packages such ciwork use it.
+      done date: 8 Jan 2024
+  - source: all
+    date: 8 Jan 2024
+    source version: to-be-advised
+    notes: |
+      consider changing all ioutil functions so that the io-operation-byte-count is returned with the error
 base.go:
   date: 2 Jan 2024
   source version: 42fa8a1

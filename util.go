@@ -196,8 +196,6 @@ func hasErrIface(v reflect.Value) (error, bool) {
 // HasErrKind
 // ---------------------------------------------------------------//
 func HasErrKind(r interface{}) (err error, isErr bool) {
-	err = nil
-	isErr = false
 	v := reflect.ValueOf(r)
 	switch v.Kind() {
 	case reflect.Struct:
@@ -244,69 +242,6 @@ func PanicHandler(errHandler func(error), fd ...*os.File) func() {
 	}
 }
 
-// ==================================================================//
-// ApiError
-// ==================================================================//
-type ApiError struct {
-	code int
-	key  string
-	err  error
-}
-
-// ------------------------------------------------------------------//
-// As
-// ------------------------------------------------------------------//
-func (e ApiError) As(target interface{}) bool {
-	return ErrorAs(e.err, target)
-}
-
-// ------------------------------------------------------------------//
-// Code
-// ------------------------------------------------------------------//
-func (e ApiError) Code() int {
-	return e.code
-}
-
-// ------------------------------------------------------------------//
-// Key
-// ------------------------------------------------------------------//
-func (e ApiError) Key() string {
-	return e.key
-}
-
-// ------------------------------------------------------------------//
-// Error
-// ------------------------------------------------------------------//
-func (e ApiError) Error() string {
-	return fmt.Sprintf("%s error[%d] : %s", e.key, e.code, e.err.Error())
-}
-
-// ------------------------------------------------------------------//
-// Is
-// ------------------------------------------------------------------//
-func (e ApiError) Is(target error) bool {
-	_, matched := target.(*ApiError)
-	return matched
-}
-
-// ------------------------------------------------------------------//
-// ToApiNote
-// ------------------------------------------------------------------//
-func (n ApiError) ToApiNote() *ApiNote {
-	return &ApiNote{
-		code: n.code,
-		data: n.key,
-		err:  n.err,
-	}
-}
-
-// ------------------------------------------------------------------//
-// Unwrap
-// ------------------------------------------------------------------//
-func (n ApiError) Unwrap() error {
-	return n.err
-}
-
 // ------------------------------------------------------------------//
 // ErrorAs
 // ------------------------------------------------------------------//
@@ -351,6 +286,17 @@ func (r FlowRule) Bool(key string) bool {
 }
 
 // ------------------------------------------------------------------//
+// Copy
+// ------------------------------------------------------------------//
+func (r FlowRule) Copy() FlowRule {
+	x := FlowRule{}
+	for k, v := range r {
+		x.Add(k, v)
+	}
+	return x
+}
+
+// ------------------------------------------------------------------//
 // Float
 // ------------------------------------------------------------------//
 func (r FlowRule) Float(key string) float64 {
@@ -374,21 +320,13 @@ func (r FlowRule) String(key string) string {
 	return x
 }
 
-// ------------------------------------------------------------------//
-// StringList
-// ------------------------------------------------------------------//
-func (r FlowRule) StringList(key string) []string {
-	w, found := r[key]
-	if !found {
-		return []string{}
-	}
-	switch x := w.(type) {
-	case []string:
-		return x
-	case []interface{}:
-		return toStringList(x)
-	}
-	return []string{}
+// ----------------------------------------------------------------//
+// ToRunware
+// ----------------------------------------------------------------//
+func (r FlowRule) ToRunware() (*Strucex, error) {
+	x := stx.Strucex{}
+	err := x.Decode(r.AsMap())
+	return &x, err
 }
 
 // ------------------------------------------------------------------//
@@ -413,6 +351,23 @@ func (r FlowRule) Runware(key string) (*Strucex, error) {
 	s := stx.Strucex{}
 	err := s.Decode(x)
 	return &s, err
+}
+
+// ------------------------------------------------------------------//
+// StringList
+// ------------------------------------------------------------------//
+func (r FlowRule) StringList(key string) []string {
+	w, found := r[key]
+	if !found {
+		return []string{}
+	}
+	switch x := w.(type) {
+	case []string:
+		return x
+	case []interface{}:
+		return toStringList(x)
+	}
+	return []string{}
 }
 
 // ----------------------------------------------------------------//

@@ -177,21 +177,6 @@ func (n *ApiNote) fromMap(vm map[string]*spb.Value) {
 		if errtxt := x.GetStringValue(); errtxt != "" {
 			n.err = errors.New(errtxt)
 		}
-	} else if x, ok := vm["ApiError"]; ok {
-		switch x.GetKind().(type) {
-		case *spb.Value_StructValue:
-			if y := x.GetStructValue(); y != nil {
-				var err error
-				if errtxt := y.Fields["Error"].GetStringValue(); errtxt != "" {
-					err = errors.New(errtxt)
-				}
-				n.err = ApiError{
-					code: int(y.Fields["Code"].GetNumberValue()),
-					key:  y.Fields["Key"].GetStringValue(),
-					err:  err,
-				}
-			}
-		}
 	}
 	n.data = vm["Data"]
 }

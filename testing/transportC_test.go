@@ -110,25 +110,15 @@ func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	scanner.Split(bufio.ScanLines)
 
 	tc.ResetVars()
-	cache := LineCache{}
 	for scanner.Scan() {
-		cache.add(scanner.Text())
-		if cache.size() > 4096 {
-			wreq := tpt.FlowRule{}
-			wreq.Add("Action", "Null")
-			wreq.Add("Data", cache.flush())
-			// logger.Debugf("sending write timeout record[%d] ...", i)
-			if req, err = stx.NewRunware(wreq.AsMap()); err != nil {
-				return fmt.Errorf("write create request error : %v", err)
-			} else if err := tc.AsyncRequest(req); err != nil {
-				if !assert.Check(t, errors.Is(err, os.ErrDeadlineExceeded), "assert-2") {
-					return fmt.Errorf("assert-2 failed : %v", err)
-				} else if err = tc.conn.SetWriteDeadline(time.Time{}); err != nil {
-					return err
-				}
-				tc.ResetVars()
-				return nil
+		if err := tc.AddLine(scanner.Text()); err != nil {
+			if !assert.Check(t, errors.Is(err, os.ErrDeadlineExceeded), "assert-2") {
+				return fmt.Errorf("assert-2 failed : %v", err)
+			} else if err = tc.conn.SetWriteDeadline(time.Time{}); err != nil {
+				return err
 			}
+			tc.ResetVars()
+			return nil
 		}
 	}
 	return nil

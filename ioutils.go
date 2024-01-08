@@ -9,46 +9,9 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"net"
-	"syscall"
 )
 
 var ErrConnexCancelled = errors.New("network connection was cancelled")
-
-// ----------------------------------------------------------------//
-// Closure
-// ----------------------------------------------------------------//
-func Closure(err error) bool {
-	netErr, isNetErr := err.(*net.OpError)
-	if isNetErr {
-		errno, isErrno := netErr.Err.(syscall.Errno)
-		return isErrno && errno == syscall.ECONNRESET
-	}
-	return false
-}
-
-// ----------------------------------------------------------------//
-// GetReply
-// ----------------------------------------------------------------//
-func GetReply(r io.Reader) *ApiNote {
-	status := &ApiNote{}
-	_, frame, err := ReadWH(r)
-	if err != nil {
-		switch {
-		case errors.Is(err, io.EOF):
-			return status.Withf(500, "io.Reader failed : peer connection closed")
-		default:
-			logger.Errorf("io.Reader failed : %v", err)
-			return status.With(400, err)
-		}
-	}
-	err = status.Decode(frame)
-	if err != nil {
-		return status.With(400, err)
-	}
-	// logger.Debugf("GetReply response : %v", status)
-	return status
-}
 
 // ----------------------------------------------------------------//
 // ParseHeader
