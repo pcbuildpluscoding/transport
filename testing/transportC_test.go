@@ -71,28 +71,24 @@ func TestIoUtils(t *testing.T) {
 // tcc_ioutils
 // ----------------------------------------------------------------//
 func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
-	logger.Debugf("running tc_readConn ...")
+	logger.Debugf("running tcc_ioutils ...")
 
-	// wdata := rw.Pop("WriteData")
-	// if wdata.Empty() {
-	// 	return fmt.Errorf("write timeout data is undefined")
-	// }
 	tc, _ := arg.(*TestClient)
 	req := rw.SubNode("Request", false).Copy()
 	_ = req.Set("Action", "ReadTimeout")
 	_ = req.Set("ReadTimeout", rw.Int("ReadTimeout")+1)
 	logger.Debugf("running with request : %v", req.AsMap())
-	resp := toApiNote(tc.Request(req))
-	if !assert.Check(t, errors.Is(resp.Unwrap(), os.ErrDeadlineExceeded), "assert-0") {
-		return fmt.Errorf("assert-0 failed : %v", resp.Unwrap())
+	err := toApiNote(tc.Request(req)).Unwrap()
+	if !assert.Check(t, errors.Is(err, os.ErrDeadlineExceeded), "assert-0") {
+		return fmt.Errorf("assert-0 failed : %v", err)
 	}
-	assert.Equal(t, 0, resp.Parameter().Int(), "assert-1")
+	assert.Assert(t, strings.HasPrefix(err.Error(), "read tcp"), "assert-1")
 
 	req = rw.SubNode("Request", false).Copy()
 	_ = req.Set("Action", "WriteTimeout")
 	_ = req.Set("WriteTimeout", rw.Int("WriteTimeout")+2)
 	logger.Debugf("sending async request : %v", req.AsMap())
-	err := tc.AsyncRequest(req)
+	err = tc.AsyncRequest(req)
 	if err != nil {
 		return fmt.Errorf("write timeout request error : %v", err)
 	}
@@ -114,13 +110,16 @@ func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 		if err := tc.AddLine(scanner.Text()); err != nil {
 			if !assert.Check(t, errors.Is(err, os.ErrDeadlineExceeded), "assert-2") {
 				return fmt.Errorf("assert-2 failed : %v", err)
-			} else if err = tc.conn.SetWriteDeadline(time.Time{}); err != nil {
+			}
+			assert.Assert(t, strings.HasPrefix(err.Error(), "write tcp"), "assert-3")
+			if err = tc.conn.SetWriteDeadline(time.Time{}); err != nil {
 				return err
 			}
 			tc.ResetVars()
 			return nil
 		}
 	}
+	logger.Debugf("tcc_ioutils is complete.")
 	return nil
 }
 
@@ -128,7 +127,7 @@ func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 // getTestCaseKeys
 // ------------------------------------------------------------------//
 func getTestbookC(rw *stx.Strucex, x string) ([]Testcase, error) {
-	w, err := getTestbookKeys(rw, "testbookB", x)
+	w, err := getTestbookKeys(rw, "testbookC", x)
 	if err != nil {
 		return nil, err
 	}
