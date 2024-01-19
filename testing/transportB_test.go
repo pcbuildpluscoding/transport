@@ -73,6 +73,69 @@ func tcb_CheckErr(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 }
 
 // ----------------------------------------------------------------//
+// tcb_FlowRule
+// ----------------------------------------------------------------//
+func tcb_FlowRule(t *testing.T, rw *stx.Strucex, arg interface{}) error {
+	logger.Debugf("running tc_Flowrule ...")
+	frA := tpt.FlowRule{}
+	frA.Add("Sync", true)
+	assert.Equal(t, true, frA.Bool("Sync"), "assert-0")
+	frA.Add("Code", 400)
+	assert.Equal(t, 400, frA.Int("Code"), "assert-1")
+	assert.Equal(t, 400.0, frA.Float("Code"), "assert-2")
+	frA.Add("Code", float64(400))
+	assert.Equal(t, 400, frA.Int("Code"), "assert-3")
+	assert.Equal(t, 400.0, frA.Float("Code"), "assert-4")
+	frA.Add("PerfMetric", 89.1234)
+	assert.Equal(t, 89.1234, frA.Float("PerfMetric"), "assert-5")
+	x := map[string]interface{}{
+		"Code":  float64(402),
+		"Key":   "application-xyz",
+		"Fruit": []interface{}{"apple", "orange", "banana"},
+	}
+	frA.Add("Data", x)
+	assert.Assert(t, is.DeepEqual(x, frA.Value("Data")), "assert-6")
+	rwA, err := frA.Runware("Data")
+	assert.NilError(t, err, "assert-7")
+	assert.Assert(t, is.DeepEqual(x, rwA.AsMap()), "assert-8")
+	frA.Add("Error", "container restart failed")
+	assert.Equal(t, "container restart failed", frA.String("Error"), "assert-9")
+	frA.Add("Fruit", []interface{}{"apple", "orange", "banana"})
+	assert.Equal(t, "apple,orange,banana", stringify(frA.StringList("Fruit")), "assert-10")
+	assert.Equal(t, "apple,orange,banana", stringify(frA.Pop("Fruit")), "assert-10A")
+	z := []interface{}{66.333, "baseline perf", float64(10)}
+	frA.Add("PerfData", z)
+	assert.Assert(t, is.DeepEqual(z, frA.Value("PerfData")), "assert-11")
+	frB := tpt.FlowRule(rw.AsMap())
+	assert.Assert(t, is.DeepEqual(frB.AsMap(), frA.AsMap()), "assert-12")
+	rwA, err = frA.AsRunware()
+	assert.NilError(t, err, "assert-13")
+	assert.Assert(t, is.DeepEqual(frB.AsMap(), rwA.AsMap()), "assert-13A")
+	s, err := frA.AsStruct()
+	assert.NilError(t, err, "assert-14")
+	assert.Assert(t, is.DeepEqual(frB.AsMap(), s.AsMap()), "assert-14A")
+
+	plist, err := frA.ParamList("PerfData")
+	assert.NilError(t, err, "assert-15")
+	for i, p := range plist {
+		switch i {
+		case 0:
+			assert.Equal(t, 66.333, p.Float64(), "assert-15-0")
+		case 1:
+			assert.Equal(t, "baseline perf", p.String(), "assert-15-1")
+		case 2:
+			assert.Equal(t, 10, p.Int(), "assert-15-2")
+		}
+	}
+
+	frC := frA.Copy()
+	assert.Assert(t, is.DeepEqual(frB.AsMap(), frC.AsMap()), "assert-16")
+
+	logger.Debugf("tc_Flowrule is complete ...")
+	return nil
+}
+
+// ----------------------------------------------------------------//
 // tcb_With
 // ----------------------------------------------------------------//
 func tcb_With(t *testing.T, rw *stx.Strucex, arg interface{}) error {
@@ -118,6 +181,8 @@ func getTestbookB(rw *stx.Strucex, x string) ([]Testcase, error) {
 		switch strings.TrimSpace(z) {
 		case "tcb_CheckErr":
 			y[i] = Testcase{actor: tcb_CheckErr, name: "tcb_CheckErr", dataKey: "AsMap"}
+		case "tcb_FlowRule":
+			y[i] = Testcase{actor: tcb_FlowRule, name: "tcb_FlowRule", dataKey: "FlowRule"}
 		case "tcb_With":
 			y[i] = Testcase{actor: tcb_With, name: "tcb_With", dataKey: "AsMap"}
 		default:

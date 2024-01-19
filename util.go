@@ -270,11 +270,24 @@ func (r FlowRule) Add(key string, value interface{}) {
 // Runware
 // ----------------------------------------------------------------//
 func (r FlowRule) AsMap() map[string]interface{} {
-	x := make(map[string]interface{}, len(r))
-	for k, v := range r {
-		x[k] = v
-	}
-	return x
+	return r
+}
+
+// ----------------------------------------------------------------//
+// AsRunware
+// ----------------------------------------------------------------//
+func (r FlowRule) AsRunware() (*Strucex, error) {
+	x := stx.Strucex{}
+	err := x.Decode(r.AsMap())
+	return &x, err
+}
+
+// ----------------------------------------------------------------//
+// AsStruct
+// ----------------------------------------------------------------//
+func (r FlowRule) AsStruct() (*spb.Struct, error) {
+	s, err := spb.NewValue(r.AsMap())
+	return s.GetStructValue(), err
 }
 
 // ------------------------------------------------------------------//
@@ -300,33 +313,28 @@ func (r FlowRule) Copy() FlowRule {
 // Float
 // ------------------------------------------------------------------//
 func (r FlowRule) Float(key string) float64 {
-	x, _ := r[key].(float64)
-	return x
+	switch x := r[key].(type) {
+	case nil:
+	case float64:
+		return x
+	case int:
+		return float64(x)
+	}
+	return 0
 }
 
 // ------------------------------------------------------------------//
 // Int
 // ------------------------------------------------------------------//
 func (r FlowRule) Int(key string) int {
-	x, _ := r[key].(int)
-	return x
-}
-
-// ------------------------------------------------------------------//
-// String
-// ------------------------------------------------------------------//
-func (r FlowRule) String(key string) string {
-	x, _ := r[key].(string)
-	return x
-}
-
-// ----------------------------------------------------------------//
-// ToRunware
-// ----------------------------------------------------------------//
-func (r FlowRule) ToRunware() (*Strucex, error) {
-	x := stx.Strucex{}
-	err := x.Decode(r.AsMap())
-	return &x, err
+	switch x := r[key].(type) {
+	case nil:
+	case float64:
+		return int(x)
+	case int:
+		return x
+	}
+	return 0
 }
 
 // ------------------------------------------------------------------//
@@ -340,6 +348,15 @@ func (r FlowRule) ParamList(key string) ([]*Parametric, error) {
 	return toParamList(key, w)
 }
 
+// ------------------------------------------------------------------//
+// Pop
+// ------------------------------------------------------------------//
+func (r FlowRule) Pop(key string) interface{} {
+	x := r[key]
+	delete(r, key)
+	return x
+}
+
 // ----------------------------------------------------------------//
 // Runware
 // ----------------------------------------------------------------//
@@ -351,6 +368,14 @@ func (r FlowRule) Runware(key string) (*Strucex, error) {
 	s := stx.Strucex{}
 	err := s.Decode(x)
 	return &s, err
+}
+
+// ------------------------------------------------------------------//
+// String
+// ------------------------------------------------------------------//
+func (r FlowRule) String(key string) string {
+	x, _ := r[key].(string)
+	return x
 }
 
 // ------------------------------------------------------------------//
@@ -370,6 +395,17 @@ func (r FlowRule) StringList(key string) []string {
 	return []string{}
 }
 
+// ------------------------------------------------------------------//
+// Value
+// ------------------------------------------------------------------//
+func (r FlowRule) Value(key string) interface{} {
+	x, _ := r[key]
+	return x
+}
+
+// ----------------------------------------------------------------//
+// utils
+// ----------------------------------------------------------------//
 // ----------------------------------------------------------------//
 // toStringList
 // ----------------------------------------------------------------//

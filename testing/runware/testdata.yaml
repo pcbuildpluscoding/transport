@@ -13,6 +13,16 @@ Bytes:
   Data: container restart failed
 ErrorAs:
   Error: test error
+FlowRule:
+  Code: 400
+  Data:
+    Code: 402
+    Key: application-xyz
+    Fruit: [apple, orange, banana]
+  Error: container restart failed
+  PerfMetric: 89.1234
+  PerfData: [66.333, "baseline perf", 10]
+  Sync: true
 TestClient:
   Request:
     JobId: 04135d7a-ac74-11ee-9946-abe5079abce3

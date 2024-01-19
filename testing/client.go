@@ -116,7 +116,7 @@ func (c *TestClient) AddLine(line string) error {
 		}
 		rd := c.writeReq.Copy() // rd : reqData
 		rd.Add("Data", c.cache.flush())
-		req, _ := rd.ToRunware() // req : request
+		req, _ := rd.AsRunware() // req : request
 		return c.AsyncRequest(req)
 	}
 	return nil
