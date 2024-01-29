@@ -48,6 +48,7 @@ testbookA:
 testbookB:
   all:
     - tcb_CheckErr
+    - tcb_FlowRule
     - tcb_With
 testbookC:
   all:

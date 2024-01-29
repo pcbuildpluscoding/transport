@@ -1,0 +1,6 @@
+---
+apinote.go:
+  - source: SetData, Copy
+    date: 30 Jan 2024
+    notes: |
+      consider removing Copy as the method AsMap provides a way to export the state if copying is needed

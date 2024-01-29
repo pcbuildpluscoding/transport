@@ -24,19 +24,11 @@ type Testcase struct {
 
 var logger = logroll.Get()
 
-var remakeBucket = flag.Bool("remakeBucket", false, "remake the testing bucket on startup")
-
-var bucketName = flag.String("bucketName", "", "trovedb bucket name")
-
-var createBucket = flag.Bool("create", false, "create a new db bucket")
-
-var testcases = flag.String("testcases", "", "comma separated list of testcases to run")
-
 var dataPath = flag.String("dataPath", "", "input yaml datafile path for testing")
 
 var hugeDataPath = flag.String("hugeDataPath", "", "huge input test file for write timeout testing")
 
-var dumpPath = flag.String("dumpPath", "/data/captainia/trovedb/bucketDump.txt", "system file path for bucket dump output")
+var testcases = flag.String("testcases", "", "comma separated list of testcases to run")
 
 // ------------------------------------------------------------------//
 // getDataset

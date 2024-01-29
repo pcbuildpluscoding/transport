@@ -82,6 +82,11 @@ apinote.go:
       sometimes for error handling, the need to add qualifying data with the error is required.
       therefore, a variadic 3rd data argument is needed which is exclusively for data
     done date: 8 Jan 2024
+  - source: type/ApiNote
+    date: 21 Jan 2024
+    priority: High
+    notes: |
+      why is ApiNote.Data not *spb.Value instead of interface{}
 ioutils.go:
   - source: all
     date: 2 Jan 2024
@@ -111,7 +116,7 @@ base.go:
   source version: 42fa8a1
   notes: |
     consider moving the timestamp constants to the types package
-utils.go:
+util.go:
   - source: function/HasErrKind
     date: 5 Jan 2024
     source version: b1b6d6a
@@ -125,3 +130,7 @@ utils.go:
       remove ApiError as it now classified redundant, since the Key field which is unique compared to ApiNote can 
       easily be added to a map value assigned to ApiNote.Data
     done date: 8 Jan 2024
+  - source: type/FlowRule
+    date: 20 Jan 2024
+    notes: |
+      consider adding HasKeys method similiar to Strucex

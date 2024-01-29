@@ -228,14 +228,7 @@ func (n ApiNote) Runware() *Strucex {
 // ----------------------------------------------------------------//
 // SetData
 // ----------------------------------------------------------------//
-func (n *ApiNote) SetData(data interface{}) error {
-	return n.setData(data)
-}
-
-// ----------------------------------------------------------------//
-// setData
-// ----------------------------------------------------------------//
-func (n *ApiNote) setData(ival interface{}) error {
+func (n *ApiNote) SetData(ival interface{}, strict ...bool) error {
 	var err error
 	switch d := ival.(type) {
 	case nil:
@@ -253,6 +246,10 @@ func (n *ApiNote) setData(ival interface{}) error {
 	case stx.Strucex:
 		n.data = d.AsStruct()
 	default:
+		if strict != nil && !strict[0] {
+			n.data = ival
+			return nil
+		}
 		n.data, err = spb.NewValue(d)
 	}
 	if err != nil {
@@ -285,7 +282,7 @@ func (n *ApiNote) Value() interface{} {
 // -------------------------------------------------------------//
 func (n *ApiNote) With(code int, union interface{}, data ...interface{}) *ApiNote {
 	f := func(d interface{}) {
-		err := n.setData(d)
+		err := n.SetData(d)
 		if err != nil {
 			if n.err != nil {
 				n.err = fmt.Errorf("data error : %v : %w", err, n.err)

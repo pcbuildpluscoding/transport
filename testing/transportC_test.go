@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	// is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	stx "github.com/pcbuildpluscoding/strucex/std"
 	tpt "github.com/pcbuildpluscoding/transport"
 	"gotest.tools/v3/assert"
@@ -111,6 +110,7 @@ func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 			if !assert.Check(t, errors.Is(err, os.ErrDeadlineExceeded), "assert-2") {
 				return fmt.Errorf("assert-2 failed : %v", err)
 			}
+			// logger.Debugf("got writeDeadline error : %v", err)
 			assert.Assert(t, strings.HasPrefix(err.Error(), "write tcp"), "assert-3")
 			if err = tc.conn.SetWriteDeadline(time.Time{}); err != nil {
 				return err

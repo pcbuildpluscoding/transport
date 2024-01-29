@@ -190,11 +190,12 @@ func (c *TestClient) getReply() rdt.ApiRecord {
 		// first set the data field then the code and error
 		return c.With(400, err)
 	}
-	y, err := tpt.NewApiRecord(frame)
+	reply := &tpt.ApiNote{}
+	err = reply.Decode(frame)
 	if err != nil {
 		return c.Withf(500, "response decode error : %v", err)
 	}
-	return y
+	return reply
 }
 
 // -------------------------------------------------------------- //

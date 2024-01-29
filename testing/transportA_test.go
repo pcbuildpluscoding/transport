@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	stx "github.com/pcbuildpluscoding/strucex/std"
 	tpt "github.com/pcbuildpluscoding/transport"
+	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 // ----------------------------------------------------------------//

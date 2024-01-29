@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	stx "github.com/pcbuildpluscoding/strucex/std"
 	tpt "github.com/pcbuildpluscoding/transport"
+	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 // ----------------------------------------------------------------//
@@ -130,6 +130,10 @@ func tcb_FlowRule(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 
 	frC := frA.Copy()
 	assert.Assert(t, is.DeepEqual(frB.AsMap(), frC.AsMap()), "assert-16")
+	assert.Assert(t, frA.HasKeys("Code", "Data", "Error", "PerfMetric", "PerfData", "Sync"), "assert-17")
+	assert.Assert(t, !frA.HasKeys(), "assert-18")
+	assert.Assert(t, !frA.HasKeys("foo"), "assert-19")
+	assert.Assert(t, frA.HasKeys("Code"), "assert-19")
 
 	logger.Debugf("tc_Flowrule is complete ...")
 	return nil
