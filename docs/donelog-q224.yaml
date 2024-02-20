@@ -1,0 +1,11 @@
+---
+transport:
+  - source: apinote.go/Empty
+    date: 7 Feb 2024
+    notes: |
+      WHY does empty return false when code == 0, err == nil, data == nil????
+    bugfix: 
+      date: 20 Feb 2024
+      notes: |
+        n.data = vm["Data"] - assigns a nil *spb.Value value which is NOT nil because the
+        type value is not nil. Fix first tests if vm["Data"] is found, iff yes then set n.data = vm["Data"]

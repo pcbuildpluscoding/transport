@@ -103,7 +103,7 @@ func MarkupToRunware(filePath string, ignoreNilValue bool, key ...string) (*stx.
 	if err != nil {
 		return nil, err
 	} else if key != nil {
-		return rw.SubNode(key[0], false), nil
+		return rw.SubNode(key[0]), nil
 	}
 	return rw, nil
 }
@@ -111,18 +111,6 @@ func MarkupToRunware(filePath string, ignoreNilValue bool, key ...string) (*stx.
 // ----------------------------------------------------------------//
 // utils
 // ----------------------------------------------------------------//
-// ----------------------------------------------------------------//
-// getIntSlice
-// ----------------------------------------------------------------//
-func getIntSlice(size int) []interface{} {
-	x := make([]interface{}, size)
-	for i := range x {
-		y := 0
-		x[i] = &y
-	}
-	return x
-}
-
 // ------------------------------------------------------------------//
 // getTestbookKeys
 // ------------------------------------------------------------------//

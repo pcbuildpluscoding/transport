@@ -32,7 +32,7 @@ func TestApiResult(t *testing.T) {
 					t.Fatalf("testcase |%s| is undefined", tc.name)
 				} else if !rw.HasKeys(tc.dataKey) {
 					t.Fatalf("%s dataKey does not exist in dataset", tc.name)
-				} else if err := tc.actor(t, rw.SubNode(tc.dataKey, false).Copy(), nil); err != nil {
+				} else if err := tc.actor(t, rw.SubNode(tc.dataKey).Copy(), nil); err != nil {
 					t.Fatal(err)
 				}
 			}

@@ -26,7 +26,7 @@ func TestIoUtils(t *testing.T) {
 		t.Fatalf("testdata loading error : %v", err)
 	}
 
-	req := rw.SubNode("TestClient", false)
+	req := rw.SubNode("TestClient")
 	client, err := NewTestClient(req)
 	if err != nil {
 		t.Fatalf("client error : %v", err)
@@ -73,7 +73,7 @@ func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tcc_ioutils ...")
 
 	tc, _ := arg.(*TestClient)
-	req := rw.SubNode("Request", false).Copy()
+	req := rw.SubNode("Request").Copy()
 	_ = req.Set("Action", "ReadTimeout")
 	_ = req.Set("ReadTimeout", rw.Int("ReadTimeout")+1)
 	logger.Debugf("running with request : %v", req.AsMap())
@@ -83,7 +83,7 @@ func tcc_ioutils(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	}
 	assert.Assert(t, strings.HasPrefix(err.Error(), "read tcp"), "assert-1")
 
-	req = rw.SubNode("Request", false).Copy()
+	req = rw.SubNode("Request").Copy()
 	_ = req.Set("Action", "WriteTimeout")
 	_ = req.Set("WriteTimeout", rw.Int("WriteTimeout")+2)
 	logger.Debugf("sending async request : %v", req.AsMap())

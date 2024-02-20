@@ -34,7 +34,7 @@ func TestApiNote(t *testing.T) {
 					t.Fatalf("testcase |%s| is undefined", tc.name)
 				} else if !rw.HasKeys(tc.dataKey) {
 					t.Fatalf("%s dataKey does not exist in dataset", tc.name)
-				} else if err := tc.actor(t, rw.SubNode(tc.dataKey, false).Copy(), nil); err != nil {
+				} else if err := tc.actor(t, rw.SubNode(tc.dataKey).Copy(), nil); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -204,7 +204,7 @@ func tc_Hardcopy(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	z := y.Copy()
 	assert.NilError(t, err, "assert-3")
 	assert.Equal(t, reflect.TypeOf(y.Value()), reflect.TypeOf(z.Value()), "assert-4")
-	err = y.Runware().Set("Key", "application-abc")
+	err = y.Runware().Set("Key", "application-abc").Unwrap()
 	assert.NilError(t, err, "assert-5")
 	assert.Equal(t, z.Runware().String("Key"), "application-xyz", "assert-6")
 	logger.Debugf("tc_Hardcopy is complete ...")

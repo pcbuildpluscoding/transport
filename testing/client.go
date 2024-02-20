@@ -111,6 +111,7 @@ type TestClient struct {
 func (c *TestClient) AddLine(line string) error {
 	c.cache.add(line)
 	if c.cache.full() {
+		// why should writeReq be empty or not empty?
 		if len(c.writeReq) == 0 {
 			c.writeReq.Add("Action", "Null")
 		}
@@ -209,7 +210,7 @@ func (c *TestClient) Init(conn net.Conn, req *stx.Strucex) error {
 			return err
 		}
 	}
-	resp := c.Request(req.SubNode("Request", false))
+	resp := c.Request(req.SubNode("Request"))
 	logger.Debugf("%s got handshake response : %v", c.Desc, resp.Unwrap())
 	if err := c.checkResponse(resp, "ok"); err != nil {
 		return err

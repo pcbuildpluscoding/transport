@@ -48,3 +48,9 @@
       the proposed fix is to add a proper errcode argument that is set IF the err != nil. the optional code will now
       only be considered as an optional success code which otherwise = 200
     source version: 5227564
+  - source: apinote.go/Empty
+    date: 7 Feb 2024
+    notes: |
+      WHY does empty return false when code == 0, err == nil, data == nil????
+      bug : n.data = vm["Data"] - assigns a nil *spb.Value value for which n.data == nil returns false
+

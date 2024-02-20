@@ -1,0 +1,23 @@
+---
+apinote.go:
+  - source: method/AsMap
+    date: 10 Feb 2024
+    notes: |
+      if an instance is declared by : var n *tpt.ApiNote then n == nil until assigned a proper value
+      need to safeguard against bad usage by perhaps having using a panic catcher
+  - source: method/Decode
+    date: 11 Feb 2024
+    notes: |
+      change Decode([]byte) to Decode(interface{}) so stx.Strucex can be accepted as well as standard []byte
+  - source: method/AsMap
+    date: 12 Feb 2024
+    notes: |
+      need to protect against nil ApiNote instance calling AsMap
+      add if n == nil { return map[string] { "error": "instance is nil" }}
+      same for all pointer methods
+  - source: method/SetData
+    date: 20 Feb 2024
+    notes: |
+      add []byte to the list of acceptable types
+      code => case []byte:
+                n.data = d

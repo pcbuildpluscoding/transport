@@ -178,7 +178,12 @@ func (n *ApiNote) fromMap(vm map[string]*spb.Value) {
 			n.err = errors.New(errtxt)
 		}
 	}
-	n.data = vm["Data"]
+	// bug fix 8 Feb 2024
+	// bug : n.data = vm["Data"] - assigns a nil *spb.Value value
+	// for which n.data == nil returns false
+	if x, ok := vm["Data"]; ok {
+		n.data = x
+	}
 }
 
 // ------------------------------------------------------------------//
