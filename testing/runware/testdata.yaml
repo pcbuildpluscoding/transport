@@ -40,6 +40,7 @@ testbookA:
     - tc_ErrorAs
     - tc_Hardcopy
     - tc_Is
+    - tc_NilInstance
     - tc_Parameter
     - tc_Runware
     - tc_SetData

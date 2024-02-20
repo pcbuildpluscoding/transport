@@ -25,6 +25,9 @@ type ApiNote struct {
 // As
 // ------------------------------------------------------------------//
 func (n *ApiNote) As(target interface{}) bool {
+	if n == nil {
+		return false
+	}
 	return ErrorAs(n.err, target)
 }
 
@@ -32,6 +35,9 @@ func (n *ApiNote) As(target interface{}) bool {
 // AsMap
 // ----------------------------------------------------------------//
 func (n *ApiNote) AsMap() map[string]interface{} {
+	if n == nil {
+		return nil
+	}
 	x := spb.Struct{
 		Fields: n.asVMap(),
 	}
@@ -77,6 +83,9 @@ func (n *ApiNote) asVMap() map[string]*spb.Value {
 // Body
 // ----------------------------------------------------------------//
 func (n *ApiNote) Bytes() ([]byte, error) {
+	if n == nil {
+		return nil, fmt.Errorf("nil instance")
+	}
 	switch x := n.data.(type) {
 	case *spb.Value:
 		return base64.StdEncoding.DecodeString(x.GetStringValue())
@@ -91,6 +100,9 @@ func (n *ApiNote) Bytes() ([]byte, error) {
 // Code
 // ----------------------------------------------------------------//
 func (n *ApiNote) Code() int {
+	if n == nil {
+		return 0
+	}
 	return n.code
 }
 
@@ -98,6 +110,9 @@ func (n *ApiNote) Code() int {
 // Copy
 // ----------------------------------------------------------------//
 func (n *ApiNote) Copy() *ApiNote {
+	if n == nil {
+		return nil
+	}
 	c := &ApiNote{
 		code: n.code,
 		err:  n.err,
@@ -147,6 +162,9 @@ func copyData(ival interface{}) (interface{}, error) {
 // Decode
 // -------------------------------------------------------------//
 func (n *ApiNote) Decode(frame []byte) error {
+	if n == nil {
+		return fmt.Errorf("nil instance")
+	}
 	var s spb.Struct
 	err := s.UnmarshalJSON(frame)
 	if err != nil {
@@ -160,6 +178,9 @@ func (n *ApiNote) Decode(frame []byte) error {
 // Encode
 // -------------------------------------------------------------//
 func (n *ApiNote) Encode() ([]byte, error) {
+	if n == nil {
+		return nil, fmt.Errorf("nil instance")
+	}
 	stru := spb.Struct{
 		Fields: n.asVMap(),
 	}
@@ -234,10 +255,15 @@ func (n ApiNote) Runware() *Strucex {
 // SetData
 // ----------------------------------------------------------------//
 func (n *ApiNote) SetData(ival interface{}, strict ...bool) error {
+	if n == nil {
+		return fmt.Errorf("nil instance")
+	}
 	var err error
 	switch d := ival.(type) {
 	case nil:
 		n.data = nil
+	case []byte:
+		n.data = d
 	case []string:
 		data := make([]interface{}, len(d))
 		for i, v := range d {
@@ -274,6 +300,9 @@ func (n ApiNote) Unwrap() error {
 // Value
 // -------------------------------------------------------------//
 func (n *ApiNote) Value() interface{} {
+	if n == nil {
+		return nil
+	}
 	switch v := n.data.(type) {
 	case *spb.Value:
 		return v.AsInterface()
@@ -286,6 +315,9 @@ func (n *ApiNote) Value() interface{} {
 // With
 // -------------------------------------------------------------//
 func (n *ApiNote) With(code int, union interface{}, data ...interface{}) *ApiNote {
+	if n == nil {
+		return nil
+	}
 	f := func(d interface{}) {
 		err := n.SetData(d)
 		if err != nil {
@@ -322,6 +354,9 @@ func (n *ApiNote) With(code int, union interface{}, data ...interface{}) *ApiNot
 // Withf
 // ----------------------------------------------------------------//
 func (n *ApiNote) Withf(code int, format string, args ...interface{}) *ApiNote {
+	if n == nil {
+		return nil
+	}
 	n.code = code
 	if code >= 400 {
 		n.err = fmt.Errorf(format, args...)
@@ -335,7 +370,9 @@ func (n *ApiNote) Withf(code int, format string, args ...interface{}) *ApiNote {
 // Wrapf - wraps an existing error
 // ----------------------------------------------------------------//
 func (n *ApiNote) Wrapf(code int, format string, args ...interface{}) *ApiNote {
-	if n.err == nil {
+	if n == nil {
+		return nil
+	} else if n.err == nil {
 		return n.Withf(code, format, args...)
 	}
 	errTxt := fmt.Sprintf(format, args...) + " : %w"

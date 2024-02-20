@@ -1,7 +1,6 @@
 package test
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"reflect"
@@ -241,6 +240,38 @@ func tc_Is(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 }
 
 // ----------------------------------------------------------------//
+// tc_NilInstance
+// ----------------------------------------------------------------//
+func tc_NilInstance(t *testing.T, rw *stx.Strucex, arg interface{}) error {
+	logger.Debugf("running tc_NilInstance ...")
+
+	npErr := stx.NewNilPathError("-")
+
+	var x *tpt.ApiNote
+	assert.Assert(t, !x.As(npErr), "assert-0")
+	assert.Assert(t, x.AsMap() == nil, "assert-1")
+	y, err := x.Bytes()
+	assert.Assert(t, y == nil, "assert-2")
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-2A")
+	assert.Equal(t, 0, x.Code(), "assert-3")
+	assert.Assert(t, x.Copy() == nil, "assert-4")
+	err = x.Decode([]byte{})
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-5")
+	y, err = x.Encode()
+	assert.Assert(t, y == nil, "assert-6")
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-6A")
+	err = x.SetData(0)
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-7")
+	assert.Assert(t, x.Value() == nil, "assert-8")
+	assert.Assert(t, x.With(0, nil) == nil, "assert-9")
+	assert.Assert(t, x.Withf(0, "") == nil, "assert-10")
+	assert.Assert(t, x.Wrapf(0, "") == nil, "assert-11")
+
+	logger.Debugf("tc_NilInstance is complete")
+	return nil
+}
+
+// ----------------------------------------------------------------//
 // tc_Parameter
 // ----------------------------------------------------------------//
 func tc_Parameter(t *testing.T, rw *stx.Strucex, arg interface{}) error {
@@ -334,8 +365,8 @@ func tc_Value(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	assert.Equal(t, "foo", x.Value(), "assert-4")
 	err = x.SetData([]byte(x.Error()))
 	assert.NilError(t, err, "assert-5")
-	s := base64.StdEncoding.EncodeToString([]byte("container restart failed"))
-	assert.Equal(t, s, x.Value(), "assert-6")
+	// s := base64.StdEncoding.EncodeToString([]byte("container restart failed"))
+	assert.Assert(t, is.DeepEqual([]byte("container restart failed"), x.Value()), "assert-6")
 	x, _ = tpt.NewApiRecord(nil)
 	assert.Assert(t, x.Empty(), "assert-7")
 	assert.Equal(t, nil, x.Value(), "assert-8")
@@ -445,6 +476,8 @@ func getTestbookA(rw *stx.Strucex, x string) ([]Testcase, error) {
 			y[i] = Testcase{actor: tc_Hardcopy, name: "tc_Hardcopy", dataKey: "AsMap"}
 		case "tc_Is":
 			y[i] = Testcase{actor: tc_Is, name: "tc_Is", dataKey: "AsMap"}
+		case "tc_NilInstance":
+			y[i] = Testcase{actor: tc_NilInstance, name: "tc_NilInstance", dataKey: "AsMap"}
 		case "tc_Parameter":
 			y[i] = Testcase{actor: tc_Parameter, name: "tc_Parameter", dataKey: "AsMap"}
 		case "tc_Runware":

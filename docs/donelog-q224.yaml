@@ -9,3 +9,17 @@ transport:
       notes: |
         n.data = vm["Data"] - assigns a nil *spb.Value value which is NOT nil because the
         type value is not nil. Fix first tests if vm["Data"] is found, iff yes then set n.data = vm["Data"]
+  - source: method/SetData
+    date: 20 Feb 2024
+    notes: |
+      add []byte to the list of acceptable types
+      code => case []byte:
+                n.data = d
+    done-date: 20 Feb 2024
+  - source: method/AsMap
+    date: 12 Feb 2024
+    notes: |
+      need to protect against nil ApiNote instance calling AsMap
+      add if n == nil { return map[string] { "error": "instance is nil" }}
+      same for all pointer methods
+    done-date: 20 Feb 2024
