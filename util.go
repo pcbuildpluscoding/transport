@@ -6,6 +6,7 @@ package transport
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"runtime/debug"
@@ -227,10 +228,11 @@ func EvalErrKind(r interface{}) (errval error) {
 // -------------------------------------------------------------- //
 // PanicHandler
 // ---------------------------------------------------------------//
-func PanicHandler(errHandler func(error), fd ...*os.File) func() {
+func PanicHandler(errHandler func(error), fd ...io.Writer) func() {
 	return func() {
 		if r := recover(); r != nil {
-			logfd := os.Stdout
+			var logfd io.Writer
+			logfd = os.Stdout
 			if fd != nil && fd[0] != nil {
 				logfd = fd[0]
 			}

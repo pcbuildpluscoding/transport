@@ -3,6 +3,7 @@ package test
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -108,6 +109,24 @@ func tc_Bytes(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 
 	logger.Infof("tc_Bytes is complete.")
 	return nil
+}
+
+// ----------------------------------------------------------------//
+// tc_Catcher
+// ----------------------------------------------------------------//
+func tc_Catcher(t *testing.T, rw *stx.Strucex, arg interface{}) error {
+	logger.Debugf("running tc_Catcher ...")
+
+	outfile, err := os.Create("./dump/panic.log")
+	if err != nil {
+		return err
+	}
+	catcher := func(err error) {
+		assert.Assert(t, strings.HasSuffix(err.Error(), "this is a panic catcher test"), "assert-0")
+		// assert.Equal(t, "this is a panic catcher test", err.Error())
+	}
+	defer tpt.PanicHandler(catcher, outfile)()
+	panic("this is a panic catcher test")
 }
 
 // ----------------------------------------------------------------//
@@ -466,6 +485,8 @@ func getTestbookA(rw *stx.Strucex, x string) ([]Testcase, error) {
 			y[i] = Testcase{actor: tc_Bicode, name: "tc_Bicode", dataKey: "AsMap"}
 		case "tc_Bytes":
 			y[i] = Testcase{actor: tc_Bytes, name: "tc_Bytes", dataKey: "Bytes"}
+		case "tc_Catcher":
+			y[i] = Testcase{actor: tc_Catcher, name: "tc_Catcher", dataKey: "default"}
 		case "tc_Empty":
 			y[i] = Testcase{actor: tc_Empty, name: "tc_Empty", dataKey: "default"}
 		case "tc_Error":
