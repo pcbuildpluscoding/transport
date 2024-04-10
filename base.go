@@ -12,13 +12,12 @@ import (
 	"github.com/pcbuildpluscoding/logroll"
 	stx "github.com/pcbuildpluscoding/strucex/std"
 	fwt "github.com/pcbuildpluscoding/types/flowware"
-	"github.com/sirupsen/logrus"
 	spb "google.golang.org/protobuf/types/known/structpb"
 )
 
 // TO DO - delete these - they are moved to types/appware
 var (
-	logger                = logroll.Get()
+	logger                = logroll.New()
 	NanoDatestamp  string = "2006-01-02-15-04-05.000000"
 	MilliDatestamp string = "2006-01-02-15-04-05.000"
 	SecDatestamp   string = "2006-01-02-15-04-05"
@@ -28,7 +27,7 @@ var (
 // -------------------------------------------------------------- //
 // SetLogger
 // ---------------------------------------------------------------//
-func SetLogger(super *logrus.Logger) {
+func SetLogger(super *logroll.LogFile) {
 	logger = super
 }
 

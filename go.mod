@@ -3,11 +3,11 @@ module github.com/pcbuildpluscoding/transport
 go 1.19
 
 require (
-	github.com/pcbuildpluscoding/logroll v0.0.0-20230609064923-fb8eaa19fd08
-	github.com/pcbuildpluscoding/strucex v0.0.0-20240220060430-5a49fb0601b1
+	github.com/pcbuildpluscoding/logroll v0.0.0-20240410071854-341dc58e7508
+	github.com/pcbuildpluscoding/strucex v0.0.0-20240410080041-607681a2657f
 	github.com/pcbuildpluscoding/types v0.0.0-20231230061459-ef341fe86a2a
 	github.com/sirupsen/logrus v1.9.3
-	google.golang.org/protobuf v1.28.1
+	google.golang.org/protobuf v1.33.0
 	gotest.tools/v3 v3.5.1
 	sigs.k8s.io/yaml v1.4.0
 )

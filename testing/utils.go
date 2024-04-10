@@ -22,7 +22,7 @@ type Testcase struct {
 	dataKey string
 }
 
-var logger = logroll.Get()
+var logger = logroll.New()
 
 var dataPath = flag.String("dataPath", "", "input yaml datafile path for testing")
 
