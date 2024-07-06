@@ -1,0 +1,7 @@
+---
+transport:
+  - source: ioutils.go
+    date: 6 Jul 2024
+    notes: |
+      add err == syscall.EAGAIN test to reading and writing functions to properly handle epoll transport
+      mechanics.
