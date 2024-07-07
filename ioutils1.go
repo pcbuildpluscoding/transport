@@ -41,21 +41,17 @@ func newHeader(frame []byte, flag byte) []byte {
 // Read1
 // ----------------------------------------------------------------//
 func Read1(c net.Conn, frame []byte) error {
-	var (
-		n   int
-		err error
-	)
 	retries := 3
 	dura := time.Duration(2) * time.Second
-	for remnant := len(frame); remnant > 0; remnant -= n {
-		if remnant > 16384 {
-			remnant = 16384
-		}
-		err = c.SetReadDeadline(time.Now().Add(dura))
+	for nn := 0; nn < len(frame); {
+		err := c.SetReadDeadline(time.Now().Add(dura))
 		if err != nil {
 			return err
 		}
-		n, err = c.Read(frame)
+		n, err := c.Read(frame[nn:])
+		if n > 0 {
+			nn += n
+		}
 		if err != nil {
 			if err == syscall.EAGAIN || err == os.ErrDeadlineExceeded {
 				if retries == 0 {
@@ -134,19 +130,17 @@ func ReadPacket1(c net.Conn) ([][]byte, error) {
 // Write
 // ----------------------------------------------------------------//
 func Write1(c net.Conn, frame []byte) error {
-	var (
-		n   int
-		err error
-	)
-
 	retries := 3
 	dura := time.Duration(2) * time.Second
-	for total := 0; total < len(frame); total += n {
-		err = c.SetWriteDeadline(time.Now().Add(dura))
+	for nn := 0; nn < len(frame); {
+		err := c.SetWriteDeadline(time.Now().Add(dura))
 		if err != nil {
 			return err
 		}
-		n, err = c.Write(frame[total:])
+		n, err := c.Write(frame[nn:])
+		if n > 0 {
+			nn += n
+		}
 		if err != nil {
 			if err == syscall.EAGAIN || err == os.ErrDeadlineExceeded {
 				if retries == 0 {
