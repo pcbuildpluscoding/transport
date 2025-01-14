@@ -326,6 +326,19 @@ func (r FlowRule) Float(key string) float64 {
 }
 
 // ------------------------------------------------------------------//
+// HasAny
+// ------------------------------------------------------------------//
+func (r FlowRule) HasAny(keys ...string) bool {
+	found := false
+	for _, key := range keys {
+		if _, found = r[key]; found {
+			return found
+		}
+	}
+	return found
+}
+
+// ------------------------------------------------------------------//
 // HasKeys
 // ------------------------------------------------------------------//
 func (r FlowRule) HasKeys(keys ...string) bool {
