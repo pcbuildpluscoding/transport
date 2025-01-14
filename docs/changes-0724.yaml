@@ -5,3 +5,15 @@ transport:
     notes: |
       add err == syscall.EAGAIN test to reading and writing functions to properly handle epoll transport
       mechanics.
+  - source: ioutils1.go
+    date: 7 Jul 2024
+    notes: |
+      i) simplied and improved Read1(net.Conn, []byte) error and Write1(net.Conn, []byte) error.
+transport/flow:
+  - source: ioutils1.go
+    date: 24 Jul 2024
+    notes: |
+      i) create a new source file flow/base.go which can be imported from aiovis/flow/base.go
+      ii) create a new source file flow/ioutils.go. copy each function in transport/ioutils.go refactoring to 
+        complement the new 'flowware/aiovis/v0' flowware protocol, which limits frame size to math.MaxUint16-1.
+      

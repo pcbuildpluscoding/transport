@@ -137,11 +137,13 @@ func Write1(c net.Conn, frame []byte) error {
 		if err != nil {
 			return err
 		}
+		logger.Debugf("######## Write1 is writing, length : %d ...", len(frame[nn:]))
 		n, err := c.Write(frame[nn:])
 		if n > 0 {
 			nn += n
 		}
 		if err != nil {
+			logger.Debugf("########## Write1 got error : %v", err)
 			if err == syscall.EAGAIN || err == os.ErrDeadlineExceeded {
 				if retries == 0 {
 					return os.ErrDeadlineExceeded
