@@ -16,4 +16,5 @@
 *.log
 build/
 temp/
-testing/testdata
+testing/testdata/
+testing/hugedata/

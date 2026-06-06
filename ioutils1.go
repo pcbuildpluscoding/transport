@@ -1,22 +1,19 @@
-// The MIT License
-//
-// Copyright (c) 2020 Peter A McGill
 package transport
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
-	"io"
 	"math"
+	"net"
+	"os"
+	"syscall"
+	"time"
 )
 
-var ErrConnexCancelled = errors.New("network connection was cancelled")
-
 // ----------------------------------------------------------------//
-// ParseHeader
+// newHeader
 // ----------------------------------------------------------------//
-func ParseHeader(frame []byte, flag byte) []byte {
+func newHeader(frame []byte, flag byte) []byte {
 	// Long flag
 	fsize := len(frame)
 	large := fsize > 255
@@ -41,19 +38,28 @@ func ParseHeader(frame []byte, flag byte) []byte {
 }
 
 // ----------------------------------------------------------------//
-// Read
+// Read1
 // ----------------------------------------------------------------//
-func Read(r io.Reader, frame []byte) error {
-	var (
-		n   int
-		err error
-	)
-	for remnant := len(frame); remnant > 0; remnant -= n {
-		if remnant > 16384 {
-			remnant = 16384
-		}
-		n, err = r.Read(frame)
+func Read1(c net.Conn, frame []byte) error {
+	retries := 3
+	dura := time.Duration(2) * time.Second
+	for nn := 0; nn < len(frame); {
+		err := c.SetReadDeadline(time.Now().Add(dura))
 		if err != nil {
+			return err
+		}
+		n, err := c.Read(frame[nn:])
+		if n > 0 {
+			nn += n
+		}
+		if err != nil {
+			if err == syscall.EAGAIN || err == os.ErrDeadlineExceeded {
+				if retries == 0 {
+					return os.ErrDeadlineExceeded
+				}
+				retries--
+				continue
+			}
 			return err
 		}
 	}
@@ -63,14 +69,14 @@ func Read(r io.Reader, frame []byte) error {
 // ----------------------------------------------------------------//
 // ReadWH - read header first, get frame length, read frame
 // ----------------------------------------------------------------//
-func ReadWH(r io.Reader) (Flag, []byte, error) {
+func ReadWH1(c net.Conn) (Flag, []byte, error) {
 	var (
 		header [2]byte
 		extHdr [4]byte
 		err    error
 	)
 	// read the header
-	err = Read(r, header[:])
+	err = Read1(c, header[:])
 	if err != nil {
 		return 0, nil, err
 	}
@@ -81,8 +87,11 @@ func ReadWH(r io.Reader) (Flag, []byte, error) {
 	// Determine the actual length of the body
 	if flag.IsLarge() {
 		extHdr[0] = header[1]
-		err = Read(r, extHdr[1:])
+		err = Read1(c, extHdr[1:])
 		if err != nil {
+			if err == syscall.EAGAIN {
+				return 0, nil, nil
+			}
 			return 0, nil, err
 		}
 		fsize = binary.BigEndian.Uint32(extHdr[:])
@@ -93,26 +102,22 @@ func ReadWH(r io.Reader) (Flag, []byte, error) {
 	}
 
 	frame := make([]byte, fsize)
-	err = Read(r, frame)
-
-	if err != nil {
-		return 0, nil, err
-	}
-	return flag, frame, nil
+	err = Read1(c, frame)
+	return flag, frame, err
 }
 
 // ----------------------------------------------------------------//
 // ReadPacket
 // ----------------------------------------------------------------//
-func ReadPacket(r io.Reader) ([][]byte, error) {
-	flag, frame, err := ReadWH(r)
+func ReadPacket1(c net.Conn) ([][]byte, error) {
+	flag, frame, err := ReadWH1(c)
 	if err != nil {
 		return nil, err
 	}
 	packet := [][]byte{frame}
 	for flag.HasMore() {
 		// read the header
-		flag, frame, err = ReadWH(r)
+		flag, frame, err = ReadWH1(c)
 		if err != nil {
 			return nil, err
 		}
@@ -124,15 +129,28 @@ func ReadPacket(r io.Reader) ([][]byte, error) {
 // ----------------------------------------------------------------//
 // Write
 // ----------------------------------------------------------------//
-func Write(w io.Writer, frame []byte) error {
-	var (
-		n   int
-		err error
-	)
-
-	for total := 0; total < len(frame); total += n {
-		n, err = w.Write(frame[total:])
+func Write1(c net.Conn, frame []byte) error {
+	retries := 3
+	dura := time.Duration(2) * time.Second
+	for nn := 0; nn < len(frame); {
+		err := c.SetWriteDeadline(time.Now().Add(dura))
 		if err != nil {
+			return err
+		}
+		logger.Debugf("######## Write1 is writing, length : %d ...", len(frame[nn:]))
+		n, err := c.Write(frame[nn:])
+		if n > 0 {
+			nn += n
+		}
+		if err != nil {
+			logger.Debugf("########## Write1 got error : %v", err)
+			if err == syscall.EAGAIN || err == os.ErrDeadlineExceeded {
+				if retries == 0 {
+					return os.ErrDeadlineExceeded
+				}
+				retries--
+				continue
+			}
 			return err
 		}
 	}
@@ -142,35 +160,35 @@ func Write(w io.Writer, frame []byte) error {
 // ----------------------------------------------------------------//
 // WriteWH - write with header
 // ----------------------------------------------------------------//
-func WriteWH(w io.Writer, frame []byte, flag byte) error {
-	header := ParseHeader(frame, flag)
-	err := Write(w, header)
+func WriteWH1(c net.Conn, frame []byte, flag byte) error {
+	header := newHeader(frame, flag)
+	err := Write1(c, header)
 	if err != nil {
 		return err
 	}
 
-	return Write(w, frame)
+	return Write1(c, frame)
 }
 
 // ----------------------------------------------------------------//
 // WriteHPacket
 // ----------------------------------------------------------------//
-func WriteHPacket(w io.Writer, header []byte, packet ...[]byte) error {
+func WriteHPacket1(c net.Conn, header []byte, packet ...[]byte) error {
 	var flag byte
 	if len(packet) > 0 {
 		flag ^= SNDMORE
 	}
-	err := WriteWH(w, header, flag)
+	err := WriteWH1(c, header, flag)
 	if err != nil {
 		return fmt.Errorf("failed sending header : %w", err)
 	}
-	return WritePacket(w, packet...)
+	return WritePacket1(c, packet...)
 }
 
 // ----------------------------------------------------------------//
 // WritePacket without a msgtype header
 // ----------------------------------------------------------------//
-func WritePacket(w io.Writer, packet ...[]byte) error {
+func WritePacket1(c net.Conn, packet ...[]byte) error {
 	var flag byte
 	last := len(packet) - 1
 	for i, frame := range packet {
@@ -178,7 +196,7 @@ func WritePacket(w io.Writer, packet ...[]byte) error {
 		if i == last {
 			flag = 0
 		}
-		err := WriteWH(w, frame, flag)
+		err := WriteWH1(c, frame, flag)
 		if err != nil {
 			return fmt.Errorf("failed sending frame %d of %d : %w", i+1, last+1, err)
 		}

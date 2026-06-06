@@ -1,23 +1,23 @@
 package test
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	stx "github.com/pcbuildpluscoding/strucex/std"
 	tpt "github.com/pcbuildpluscoding/transport"
+	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 // ----------------------------------------------------------------//
-// TestTransport
+// TestApiNote
 // ----------------------------------------------------------------//
-func TestTransport(t *testing.T) {
+func TestApiNote(t *testing.T) {
 	tpt.SetLogger(logger)
 
 	rw, err := MarkupToRunware(*dataPath, true)
@@ -25,7 +25,7 @@ func TestTransport(t *testing.T) {
 		t.Fatalf("testdata loading error : %v", err)
 	}
 
-	t.Run("transport", func(t *testing.T) {
+	t.Run("ApiNote", func(t *testing.T) {
 		if tcslice, err := getTestbookA(rw, *testcases); err != nil {
 			t.Fatal(err)
 		} else {
@@ -34,7 +34,7 @@ func TestTransport(t *testing.T) {
 					t.Fatalf("testcase |%s| is undefined", tc.name)
 				} else if !rw.HasKeys(tc.dataKey) {
 					t.Fatalf("%s dataKey does not exist in dataset", tc.name)
-				} else if err := tc.actor(t, rw.SubNode(tc.dataKey, false).Copy()); err != nil {
+				} else if err := tc.actor(t, rw.SubNode(tc.dataKey).Copy(), nil); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -45,7 +45,7 @@ func TestTransport(t *testing.T) {
 // ----------------------------------------------------------------//
 // tc_AsMap
 // ----------------------------------------------------------------//
-func tc_AsMap(t *testing.T, rw *stx.Strucex) error {
+func tc_AsMap(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_AsMap ...")
 
 	y, err := tpt.NewApiRecord(rw.AsStruct())
@@ -65,7 +65,7 @@ func tc_AsMap(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Bicode
 // ----------------------------------------------------------------//
-func tc_Bicode(t *testing.T, rw *stx.Strucex) error {
+func tc_Bicode(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Bicode ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -92,7 +92,7 @@ func tc_Bicode(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Bytes
 // ----------------------------------------------------------------//
-func tc_Bytes(t *testing.T, rw *stx.Strucex) error {
+func tc_Bytes(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Bytes ...")
 
 	x, err := tpt.NewApiRecord(nil)
@@ -112,23 +112,41 @@ func tc_Bytes(t *testing.T, rw *stx.Strucex) error {
 }
 
 // ----------------------------------------------------------------//
+// tc_Catcher
+// ----------------------------------------------------------------//
+func tc_Catcher(t *testing.T, rw *stx.Strucex, arg interface{}) error {
+	logger.Debugf("running tc_Catcher ...")
+
+	outfile, err := os.Create("./dump/panic.log")
+	if err != nil {
+		return err
+	}
+	catcher := func(err error) {
+		assert.Assert(t, strings.HasSuffix(err.Error(), "this is a panic catcher test"), "assert-0")
+		// assert.Equal(t, "this is a panic catcher test", err.Error())
+	}
+	defer tpt.PanicHandler(catcher, outfile)()
+	panic("this is a panic catcher test")
+}
+
+// ----------------------------------------------------------------//
 // tc_ErrorAs
 // ----------------------------------------------------------------//
-func tc_ErrorAs(t *testing.T, rw *stx.Strucex) error {
+func tc_ErrorAs(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_ErrorAs ...")
 
 	y, err := tpt.NewApiRecord(rw.AsStruct())
 	assert.NilError(t, err, "assert-0")
 	assert.Assert(t, y.Unwrap() != nil, "assert-1")
 
-	assert.Assert(t, y.ErrorAs(&err), "assert-2")
+	assert.Assert(t, y.As(&err), "assert-2")
 	assert.Assert(t, err != nil, "assert-3")
 	assert.Equal(t, "test error", err.Error(), "assert-4")
 
 	errA := stx.NewNilPathError("foo/bar")
-	y = y.WithErr(errA)
+	y = y.With(400, errA)
 
-	assert.Assert(t, y.ErrorAs(&err), "assert-5")
+	assert.Assert(t, y.As(&err), "assert-5")
 	assert.Assert(t, err != nil, "assert-6")
 	assert.Equal(t, "foo/bar does not exist", err.Error(), "assert-7")
 
@@ -139,7 +157,7 @@ func tc_ErrorAs(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Empty
 // ----------------------------------------------------------------//
-func tc_Empty(t *testing.T, rw *stx.Strucex) error {
+func tc_Empty(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Empty ...")
 
 	x, err := tpt.NewApiRecord(nil)
@@ -155,7 +173,7 @@ func tc_Empty(t *testing.T, rw *stx.Strucex) error {
 	assert.Assert(t, y.Empty(), "assert-7")
 	y = y.With(0, "foo")
 	assert.Assert(t, !y.Empty(), "assert-8")
-	y = y.With(0, nil)
+	y = y.With(0, nil, nil)
 	assert.Assert(t, y.Empty(), "assert-9")
 	y = y.With(0, errors.New("for assert-10"))
 	assert.Assert(t, !y.Empty(), "assert-10")
@@ -167,7 +185,7 @@ func tc_Empty(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Error
 // ----------------------------------------------------------------//
-func tc_Error(t *testing.T, rw *stx.Strucex) error {
+func tc_Error(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Error ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -190,21 +208,21 @@ func tc_Error(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Hardcopy
 // ----------------------------------------------------------------//
-func tc_Hardcopy(t *testing.T, rw *stx.Strucex) error {
+func tc_Hardcopy(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Hardcopy ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
 	assert.NilError(t, err, "assert-0")
-	y := x.Hardcopy()
+	y := x.Copy()
 	assert.NilError(t, err, "assert-1")
 	assert.Equal(t, reflect.TypeOf(x.Value()), reflect.TypeOf(y.Value()), "assert-2")
 	x, _ = tpt.NewApiRecord(nil)
 
 	y = x.With(0, rw.Struct("Data"))
-	z := y.Hardcopy()
+	z := y.Copy()
 	assert.NilError(t, err, "assert-3")
 	assert.Equal(t, reflect.TypeOf(y.Value()), reflect.TypeOf(z.Value()), "assert-4")
-	err = y.Runware().Set("Key", "application-abc")
+	err = y.Runware().Set("Key", "application-abc").Unwrap()
 	assert.NilError(t, err, "assert-5")
 	assert.Equal(t, z.Runware().String("Key"), "application-xyz", "assert-6")
 	logger.Debugf("tc_Hardcopy is complete ...")
@@ -222,7 +240,7 @@ func (e *TestError) Error() string {
 // ----------------------------------------------------------------//
 // tc_Is
 // ----------------------------------------------------------------//
-func tc_Is(t *testing.T, rw *stx.Strucex) error {
+func tc_Is(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Is ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -241,9 +259,41 @@ func tc_Is(t *testing.T, rw *stx.Strucex) error {
 }
 
 // ----------------------------------------------------------------//
+// tc_NilInstance
+// ----------------------------------------------------------------//
+func tc_NilInstance(t *testing.T, rw *stx.Strucex, arg interface{}) error {
+	logger.Debugf("running tc_NilInstance ...")
+
+	npErr := stx.NewNilPathError("-")
+
+	var x *tpt.ApiNote
+	assert.Assert(t, !x.As(npErr), "assert-0")
+	assert.Assert(t, x.AsMap() == nil, "assert-1")
+	y, err := x.Bytes()
+	assert.Assert(t, y == nil, "assert-2")
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-2A")
+	assert.Equal(t, 0, x.Code(), "assert-3")
+	assert.Assert(t, x.Copy() == nil, "assert-4")
+	err = x.Decode([]byte{})
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-5")
+	y, err = x.Encode()
+	assert.Assert(t, y == nil, "assert-6")
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-6A")
+	err = x.SetData(0)
+	assert.Assert(t, err != nil && err.Error() == "nil instance", "assert-7")
+	assert.Assert(t, x.Value() == nil, "assert-8")
+	assert.Assert(t, x.With(0, nil) == nil, "assert-9")
+	assert.Assert(t, x.Withf(0, "") == nil, "assert-10")
+	assert.Assert(t, x.Wrapf(0, "") == nil, "assert-11")
+
+	logger.Debugf("tc_NilInstance is complete")
+	return nil
+}
+
+// ----------------------------------------------------------------//
 // tc_Parameter
 // ----------------------------------------------------------------//
-func tc_Parameter(t *testing.T, rw *stx.Strucex) error {
+func tc_Parameter(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Parameter ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -263,7 +313,7 @@ func tc_Parameter(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Runware
 // ----------------------------------------------------------------//
-func tc_Runware(t *testing.T, rw *stx.Strucex) error {
+func tc_Runware(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Runware ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -282,6 +332,10 @@ func tc_Runware(t *testing.T, rw *stx.Strucex) error {
 	assert.Equal(t, 505, z.Int("Code"), "assert-6")
 	assert.Equal(t, "ab51cf5a-ab92-11ee-9946-abe5079abce3", z.String("JobId"), "assert-7")
 
+	z = x.With(0, *rw).Runware()
+	assert.NilError(t, z.Unwrap(), "assert-8")
+	assert.Equal(t, 402, z.Int("Data/Code"), "assert-9")
+
 	logger.Debugf("tc_Runware is complete ...")
 	return nil
 }
@@ -289,7 +343,7 @@ func tc_Runware(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_SetData
 // ----------------------------------------------------------------//
-func tc_SetData(t *testing.T, rw *stx.Strucex) error {
+func tc_SetData(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_SetData ...")
 
 	x, err := tpt.NewApiRecord(nil)
@@ -317,7 +371,7 @@ func tc_SetData(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_Value
 // ----------------------------------------------------------------//
-func tc_Value(t *testing.T, rw *stx.Strucex) error {
+func tc_Value(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_Value ...")
 
 	x, err := tpt.NewApiRecord(rw.AsStruct())
@@ -330,8 +384,8 @@ func tc_Value(t *testing.T, rw *stx.Strucex) error {
 	assert.Equal(t, "foo", x.Value(), "assert-4")
 	err = x.SetData([]byte(x.Error()))
 	assert.NilError(t, err, "assert-5")
-	s := base64.StdEncoding.EncodeToString([]byte("container restart failed"))
-	assert.Equal(t, s, x.Value(), "assert-6")
+	// s := base64.StdEncoding.EncodeToString([]byte("container restart failed"))
+	assert.Assert(t, is.DeepEqual([]byte("container restart failed"), x.Value()), "assert-6")
 	x, _ = tpt.NewApiRecord(nil)
 	assert.Assert(t, x.Empty(), "assert-7")
 	assert.Equal(t, nil, x.Value(), "assert-8")
@@ -343,7 +397,7 @@ func tc_Value(t *testing.T, rw *stx.Strucex) error {
 // ----------------------------------------------------------------//
 // tc_With
 // ----------------------------------------------------------------//
-func tc_With(t *testing.T, rw *stx.Strucex) error {
+func tc_With(t *testing.T, rw *stx.Strucex, arg interface{}) error {
 	logger.Debugf("running tc_With ...")
 
 	x, _ := tpt.NewApiRecord(nil)
@@ -371,6 +425,45 @@ func tc_With(t *testing.T, rw *stx.Strucex) error {
 	y = y.Wrapf(500, "another testing error")
 	assert.Equal(t, "another testing error : a testing error", y.Error(), "assert-12")
 
+	x, _ = tpt.NewApiRecord(nil)
+	err := errors.New("something broke")
+	y = x.With(400, err, 1234)
+	assert.Equal(t, 400, y.Code(), "assert-13")
+	assert.Equal(t, "something broke", y.Error(), "assert-14")
+	assert.Equal(t, 1234, y.Parameter().Int(), "assert-15")
+	err = errors.New("just now!")
+	y = y.Wrapf(500, "something else broke : %v", err)
+	assert.Equal(t, 500, y.Code(), "assert-16")
+	// logger.Debugf("wrapped error : |%s|", y.Error())
+	assert.Equal(t, "something else broke : just now! : something broke", y.Error(), "assert-17")
+	assert.Equal(t, 1234, y.Parameter().Int(), "assert-18")
+	y = y.With(501, nil, map[string]interface{}{
+		"foo": "bar",
+	})
+	assert.Equal(t, 501, y.Code(), "assert-19")
+	assert.Equal(t, "something else broke : just now! : something broke", y.Error(), "assert-20")
+	assert.Equal(t, "bar", y.Runware().String("foo"), "assert-21")
+
+	y = y.With(503, []string{"a new", "data", "kind"})
+	assert.Equal(t, "a new data kind", stringify(y.Parameter().StringList(), " "), "assert-22")
+
+	r := tpt.ApiResult{}
+	err = errors.New("something broke")
+	y = r.With(400, err, 1234)
+	assert.Equal(t, 400, y.Code(), "assert-23")
+	assert.Equal(t, "something broke", y.Error(), "assert-24")
+	assert.Equal(t, 1234, y.Parameter().Int(), "assert-25")
+
+	y = r.With(503, []string{"a new", "data", "kind"})
+	assert.Equal(t, 503, y.Code(), "assert-26")
+	assert.NilError(t, y.Unwrap(), "assert-27")
+	assert.Equal(t, "a new data kind", stringify(y.Parameter().StringList(), " "), "assert-28")
+
+	y = y.With(500, errors.New("small error"), errors.New("data error"))
+	assert.Equal(t, 500, y.Code(), "assert-28")
+	assert.Equal(t, "small error", y.Error(), "assert-29")
+	assert.Equal(t, "data error", y.Parameter().String(), "assert-30")
+
 	logger.Debugf("tc_With is complete ...")
 	return nil
 }
@@ -392,6 +485,8 @@ func getTestbookA(rw *stx.Strucex, x string) ([]Testcase, error) {
 			y[i] = Testcase{actor: tc_Bicode, name: "tc_Bicode", dataKey: "AsMap"}
 		case "tc_Bytes":
 			y[i] = Testcase{actor: tc_Bytes, name: "tc_Bytes", dataKey: "Bytes"}
+		case "tc_Catcher":
+			y[i] = Testcase{actor: tc_Catcher, name: "tc_Catcher", dataKey: "default"}
 		case "tc_Empty":
 			y[i] = Testcase{actor: tc_Empty, name: "tc_Empty", dataKey: "default"}
 		case "tc_Error":
@@ -402,6 +497,8 @@ func getTestbookA(rw *stx.Strucex, x string) ([]Testcase, error) {
 			y[i] = Testcase{actor: tc_Hardcopy, name: "tc_Hardcopy", dataKey: "AsMap"}
 		case "tc_Is":
 			y[i] = Testcase{actor: tc_Is, name: "tc_Is", dataKey: "AsMap"}
+		case "tc_NilInstance":
+			y[i] = Testcase{actor: tc_NilInstance, name: "tc_NilInstance", dataKey: "AsMap"}
 		case "tc_Parameter":
 			y[i] = Testcase{actor: tc_Parameter, name: "tc_Parameter", dataKey: "AsMap"}
 		case "tc_Runware":

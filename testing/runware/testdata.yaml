@@ -13,6 +13,23 @@ Bytes:
   Data: container restart failed
 ErrorAs:
   Error: test error
+FlowRule:
+  Code: 400
+  Data:
+    Code: 402
+    Key: application-xyz
+    Fruit: [apple, orange, banana]
+  Error: container restart failed
+  PerfMetric: 89.1234
+  PerfData: [66.333, "baseline perf", 10]
+  Sync: true
+TestClient:
+  Request:
+    JobId: 04135d7a-ac74-11ee-9946-abe5079abce3
+  RemoteAddr: '127.0.0.1:9090'
+  ReadTimeout: 3
+  WriteTimeout: 3
+  WriteBufferSize: 1024
 testbookA:
   all:
     - tc_AsMap
@@ -23,8 +40,17 @@ testbookA:
     - tc_ErrorAs
     - tc_Hardcopy
     - tc_Is
+    - tc_NilInstance
     - tc_Parameter
     - tc_Runware
     - tc_SetData
     - tc_Value
     - tc_With
+testbookB:
+  all:
+    - tcb_CheckErr
+    - tcb_FlowRule
+    - tcb_With
+testbookC:
+  all:
+    - tcc_ioutils

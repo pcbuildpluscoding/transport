@@ -1,0 +1,13 @@
+---
+transport:
+  - source: utils.go
+    date: 16 Mar 2024
+    notes: |
+      utils.EvalErrKind, HasErrKind and hasErrIface needs a review
+      added a tc_Catcher method to transportA_test.go which revealed that EvalErrKind
+      does not resolve the panic r := recover() data instance back to an error
+      the reflection resolving method need attention
+  - source: utils.go
+    date: 29 Mar 2024
+    notes: |
+      add FlowRule.Set(key string, value interface{})

@@ -6,11 +6,14 @@ package transport
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"runtime/debug"
 
+	stx "github.com/pcbuildpluscoding/strucex/std"
 	"github.com/sirupsen/logrus"
+	spb "google.golang.org/protobuf/types/known/structpb"
 )
 
 // ================================================================//
@@ -194,8 +197,6 @@ func hasErrIface(v reflect.Value) (error, bool) {
 // HasErrKind
 // ---------------------------------------------------------------//
 func HasErrKind(r interface{}) (err error, isErr bool) {
-	err = nil
-	isErr = false
 	v := reflect.ValueOf(r)
 	switch v.Kind() {
 	case reflect.Struct:
@@ -227,10 +228,11 @@ func EvalErrKind(r interface{}) (errval error) {
 // -------------------------------------------------------------- //
 // PanicHandler
 // ---------------------------------------------------------------//
-func PanicHandler(errHandler func(error), fd ...*os.File) func() {
+func PanicHandler(errHandler func(error), fd ...io.Writer) func() {
 	return func() {
 		if r := recover(); r != nil {
-			logfd := os.Stdout
+			var logfd io.Writer
+			logfd = os.Stdout
 			if fd != nil && fd[0] != nil {
 				logfd = fd[0]
 			}
@@ -240,69 +242,6 @@ func PanicHandler(errHandler func(error), fd ...*os.File) func() {
 			fmt.Fprintf(logfd, "%s\n\n%s\n", r, debug.Stack())
 		}
 	}
-}
-
-// ==================================================================//
-// ApiError
-// ==================================================================//
-type ApiError struct {
-	code int
-	key  string
-	err  error
-}
-
-// ------------------------------------------------------------------//
-// As
-// ------------------------------------------------------------------//
-func (e ApiError) As(target interface{}) bool {
-	return ErrorAs(e.err, target)
-}
-
-// ------------------------------------------------------------------//
-// Code
-// ------------------------------------------------------------------//
-func (e ApiError) Code() int {
-	return e.code
-}
-
-// ------------------------------------------------------------------//
-// Key
-// ------------------------------------------------------------------//
-func (e ApiError) Key() string {
-	return e.key
-}
-
-// ------------------------------------------------------------------//
-// Error
-// ------------------------------------------------------------------//
-func (e ApiError) Error() string {
-	return fmt.Sprintf("%s error[%d] : %s", e.key, e.code, e.err.Error())
-}
-
-// ------------------------------------------------------------------//
-// Is
-// ------------------------------------------------------------------//
-func (e ApiError) Is(target error) bool {
-	_, matched := target.(*ApiError)
-	return matched
-}
-
-// ------------------------------------------------------------------//
-// ToApiNote
-// ------------------------------------------------------------------//
-func (n ApiError) ToApiNote() *ApiNote {
-	return &ApiNote{
-		code: n.code,
-		data: n.key,
-		err:  n.err,
-	}
-}
-
-// ------------------------------------------------------------------//
-// Unwrap
-// ------------------------------------------------------------------//
-func (n ApiError) Unwrap() error {
-	return n.err
 }
 
 // ------------------------------------------------------------------//
@@ -315,4 +254,231 @@ func ErrorAs(err error, i interface{}) bool {
 		return errors.As(err, i)
 	}
 	return false
+}
+
+// ==================================================================//
+// FlowRule
+// ==================================================================//
+type FlowRule map[string]interface{}
+
+// ------------------------------------------------------------------//
+// Add
+// ------------------------------------------------------------------//
+func (r FlowRule) Add(key string, value interface{}) {
+	r[key] = value
+}
+
+// ----------------------------------------------------------------//
+// Runware
+// ----------------------------------------------------------------//
+func (r FlowRule) AsMap() map[string]interface{} {
+	return r
+}
+
+// ----------------------------------------------------------------//
+// AsRunware
+// ----------------------------------------------------------------//
+func (r FlowRule) AsRunware() (*Strucex, error) {
+	x := stx.Strucex{}
+	err := x.Decode(r.AsMap())
+	return &x, err
+}
+
+// ----------------------------------------------------------------//
+// AsStruct
+// ----------------------------------------------------------------//
+func (r FlowRule) AsStruct() (*spb.Struct, error) {
+	s, err := spb.NewValue(r.AsMap())
+	return s.GetStructValue(), err
+}
+
+// ------------------------------------------------------------------//
+// Bool
+// ------------------------------------------------------------------//
+func (r FlowRule) Bool(key string) bool {
+	x, _ := r[key].(bool)
+	return x
+}
+
+// ------------------------------------------------------------------//
+// Copy
+// ------------------------------------------------------------------//
+func (r FlowRule) Copy() FlowRule {
+	x := FlowRule{}
+	for k, v := range r {
+		x.Add(k, v)
+	}
+	return x
+}
+
+// ------------------------------------------------------------------//
+// Float
+// ------------------------------------------------------------------//
+func (r FlowRule) Float(key string) float64 {
+	switch x := r[key].(type) {
+	case nil:
+	case float64:
+		return x
+	case int:
+		return float64(x)
+	}
+	return 0
+}
+
+// ------------------------------------------------------------------//
+// HasAny
+// ------------------------------------------------------------------//
+func (r FlowRule) HasAny(keys ...string) bool {
+	found := false
+	for _, key := range keys {
+		if _, found = r[key]; found {
+			return found
+		}
+	}
+	return found
+}
+
+// ------------------------------------------------------------------//
+// HasKeys
+// ------------------------------------------------------------------//
+func (r FlowRule) HasKeys(keys ...string) bool {
+	found := false
+	for _, key := range keys {
+		if _, found = r[key]; !found {
+			return false
+		}
+	}
+	return found
+}
+
+// ------------------------------------------------------------------//
+// Int
+// ------------------------------------------------------------------//
+func (r FlowRule) Int(key string) int {
+	switch x := r[key].(type) {
+	case nil:
+	case float64:
+		return int(x)
+	case int:
+		return x
+	}
+	return 0
+}
+
+// ------------------------------------------------------------------//
+// ParamList
+// ------------------------------------------------------------------//
+func (r FlowRule) ParamList(key string) ([]*Parametric, error) {
+	w, found := r[key]
+	if !found {
+		return []*Parametric{}, fmt.Errorf("missing key : " + key)
+	}
+	return toParamList(key, w)
+}
+
+// ------------------------------------------------------------------//
+// Pop
+// ------------------------------------------------------------------//
+func (r FlowRule) Pop(key string) interface{} {
+	x := r[key]
+	delete(r, key)
+	return x
+}
+
+// ----------------------------------------------------------------//
+// Runware
+// ----------------------------------------------------------------//
+func (r FlowRule) Runware(key string) (*Strucex, error) {
+	x, found := r[key]
+	if !found {
+		return nil, fmt.Errorf("missing key : " + key)
+	}
+	s := stx.Strucex{}
+	err := s.Decode(x)
+	return &s, err
+}
+
+// ------------------------------------------------------------------//
+// String
+// ------------------------------------------------------------------//
+func (r FlowRule) String(key string) string {
+	x, _ := r[key].(string)
+	return x
+}
+
+// ------------------------------------------------------------------//
+// StringList
+// ------------------------------------------------------------------//
+func (r FlowRule) StringList(key string) []string {
+	w, found := r[key]
+	if !found {
+		return []string{}
+	}
+	switch x := w.(type) {
+	case []string:
+		return x
+	case []interface{}:
+		return toStringList(x)
+	}
+	return []string{}
+}
+
+// ------------------------------------------------------------------//
+// Value
+// ------------------------------------------------------------------//
+func (r FlowRule) Value(key string) interface{} {
+	x, _ := r[key]
+	return x
+}
+
+// ----------------------------------------------------------------//
+// utils
+// ----------------------------------------------------------------//
+// ----------------------------------------------------------------//
+// toStringList
+// ----------------------------------------------------------------//
+func toStringList(x []interface{}) []string {
+	result := make([]string, len(x))
+	for i, ival := range x {
+		result[i], _ = ival.(string)
+	}
+	return result
+}
+
+// ----------------------------------------------------------------//
+// toParamList
+// ----------------------------------------------------------------//
+func toParamList(key string, ival interface{}) ([]*Parametric, error) {
+	var args []interface{}
+	switch val := ival.(type) {
+	case []interface{}:
+		args = val
+	case *spb.Value:
+		switch x := val.GetKind().(type) {
+		case *spb.Value_ListValue:
+			args = validList(x.ListValue)
+		default:
+			return []*Parametric{}, fmt.Errorf("structpb.List type is required")
+		}
+	case *spb.ListValue:
+		args = validList(val)
+	default:
+		return []*Parametric{}, fmt.Errorf("structpb.List type is required")
+	}
+	x := make([]*Parametric, len(args))
+	for i, value := range args {
+		id := fmt.Sprintf("%s[%d]", key, i)
+		x[i] = stx.NewParameter(id, value)
+	}
+	return x, nil
+}
+
+// -------------------------------------------------------------- //
+// validList
+// ---------------------------------------------------------------//
+func validList(x *spb.ListValue) []interface{} {
+	if x != nil {
+		return x.AsSlice()
+	}
+	return []interface{}{}
 }

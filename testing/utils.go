@@ -15,26 +15,20 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type tcActor func(*testing.T, *stx.Strucex) error
+type tcActor func(*testing.T, *stx.Strucex, interface{}) error
 type Testcase struct {
 	actor   tcActor
 	name    string
 	dataKey string
 }
 
-var logger = logroll.Get()
-
-var remakeBucket = flag.Bool("remakeBucket", false, "remake the testing bucket on startup")
-
-var bucketName = flag.String("bucketName", "", "trovedb bucket name")
-
-var createBucket = flag.Bool("create", false, "create a new db bucket")
-
-var testcases = flag.String("testcases", "", "comma separated list of testcases to run")
+var logger = logroll.New()
 
 var dataPath = flag.String("dataPath", "", "input yaml datafile path for testing")
 
-var dumpPath = flag.String("dumpPath", "/data/captainia/trovedb/bucketDump.txt", "system file path for bucket dump output")
+var hugeDataPath = flag.String("hugeDataPath", "", "huge input test file for write timeout testing")
+
+var testcases = flag.String("testcases", "", "comma separated list of testcases to run")
 
 // ------------------------------------------------------------------//
 // getDataset
@@ -109,7 +103,7 @@ func MarkupToRunware(filePath string, ignoreNilValue bool, key ...string) (*stx.
 	if err != nil {
 		return nil, err
 	} else if key != nil {
-		return rw.SubNode(key[0], false), nil
+		return rw.SubNode(key[0]), nil
 	}
 	return rw, nil
 }
@@ -117,18 +111,6 @@ func MarkupToRunware(filePath string, ignoreNilValue bool, key ...string) (*stx.
 // ----------------------------------------------------------------//
 // utils
 // ----------------------------------------------------------------//
-// ----------------------------------------------------------------//
-// getIntSlice
-// ----------------------------------------------------------------//
-func getIntSlice(size int) []interface{} {
-	x := make([]interface{}, size)
-	for i := range x {
-		y := 0
-		x[i] = &y
-	}
-	return x
-}
-
 // ------------------------------------------------------------------//
 // getTestbookKeys
 // ------------------------------------------------------------------//
